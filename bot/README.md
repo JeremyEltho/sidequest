@@ -25,8 +25,12 @@ their own agent too.
    cd bot
    cp .env.example .env   # fill in DISCORD_TOKEN, AGENTS_CHANNEL_ID, OPENROUTER_API_KEY
    npm install
+   npm run check          # tests the token, channel access, webhooks, OpenRouter key and model
    npm start
    ```
+
+   `npm test` runs the scheduler tests (no keys needed). `npm run sim` posts a whole marketplace deal
+   in the agents channel, same as typing `!sim`.
 
 ## Try it
 

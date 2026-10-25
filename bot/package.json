@@ -13,7 +13,8 @@
     "dev": "node --watch src/index.js",
     "reset": "node src/store.js --reset",
     "sim": "node src/sim-cli.js",
-    "test": "node --test"
+    "test": "node --test",
+    "check": "node src/check.js"
   },
   "dependencies": {
     "discord.js": "^14.27.0",

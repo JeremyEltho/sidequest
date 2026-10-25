@@ -11,7 +11,7 @@ import { MODEL } from './llm.js';
 
 for (const key of ['DISCORD_TOKEN', 'AGENTS_CHANNEL_ID', 'OPENROUTER_API_KEY']) {
   if (!process.env[key]) {
-    console.error(`Missing ${key}. Copy .env.example to .env and fill it in.`);
+    console.error(`Missing ${key}. Copy .env.example to .env and fill it in, then run npm run check.`);
     process.exit(1);
   }
 }

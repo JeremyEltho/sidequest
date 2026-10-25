@@ -14,8 +14,10 @@ const sameItem = (a, b) => a.toLowerCase().includes(b.toLowerCase()) || b.toLowe
 
 export function normalizeOffer(o) {
   if (!o?.item) return null;
-  const price = num(o.price);
-  const floor = num(o.floor);
+  // Prices over $10,000 are jokes or typos, not dorm listings.
+  if ((o.kind === 'sell' || o.kind === 'rent') && num(o.price) > 10000) return null;
+  const price = num(o.price) != null && num(o.price) <= 10000 ? num(o.price) : null;
+  const floor = num(o.floor) != null && num(o.floor) <= 10000 ? num(o.floor) : null;
   return {
     item: String(o.item).trim(),
     kind: KINDS.includes(o.kind) ? o.kind : price != null ? 'sell' : 'lend',

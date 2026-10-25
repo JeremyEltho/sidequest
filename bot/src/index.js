@@ -4,7 +4,8 @@ import {
   ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags,
 } from 'discord.js';
 import { state, save, studentForUser, logShared } from './store.js';
-import { interpretDM, applyProfileUpdates, runRequest, approve, decline } from './agents.js';
+import { interpretDM, applyProfileUpdates, approve, decline } from './agents.js';
+import { runRequest } from './trade.js';
 import { runMeetup } from './meetup.js';
 import { WELCOME } from './profile.js';
 import { COMMANDS, onCommand, onAutocomplete } from './commands.js';

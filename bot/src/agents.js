@@ -165,3 +165,19 @@ async function fallback(deal, s, io) {
     alternatives: deal.alternatives.slice(1),
   });
 }
+
+/**
+ * interpretDM, but the model sometimes says "meetup" (or "request", or "counter") and forgets to fill in the details.
+ * When that happens, ask again, telling it exactly what was missing, before giving up.
+ */
+export async function interpretComplete(owner, text, now = new Date(), waitingDeal = '') {
+  const missing = (r) => (r.intent === 'meetup' && !r.meetup?.with?.length)
+    || (r.intent === 'request' && !r.request?.item)
+    || (r.intent === 'counter' && !(Number(r.counter?.price) > 0));
+  let r = await interpretDM(owner, text, now, waitingDeal);
+  for (let i = 0; i < 2 && missing(r); i++) {
+    r = await interpretDM(owner, `${text}\n\n(Your last answer left the "${r.intent}" object empty. Fill it in completely from this message.)`, now, waitingDeal);
+  }
+  r.incomplete = missing(r);
+  return r;
+}

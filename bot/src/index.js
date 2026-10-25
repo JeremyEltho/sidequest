@@ -4,7 +4,7 @@ import {
   ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags,
 } from 'discord.js';
 import { state, save, studentForUser, logShared } from './store.js';
-import { interpretDM, applyProfileUpdates, approve, decline } from './agents.js';
+import { interpretDM, interpretComplete, applyProfileUpdates, approve, decline } from './agents.js';
 import { runRequest, needsMax, counterDeal } from './trade.js';
 import { runMeetup } from './meetup.js';
 import { WELCOME, normalizeOffer, offerText, publicOffer } from './profile.js';
@@ -178,7 +178,13 @@ async function handleText(owner, text, send) {
       // Not a number: treat it as a fresh message.
     }
     const waiting = waitingDealFor(owner);
-    const r = await interpretDM(owner, text, new Date(), waiting ? waiting.lines[0] : '');
+    const r = await interpretComplete(owner, text, new Date(), waiting ? waiting.lines[0] : '');
+    // Still no details after asking twice: say so, instead of going quiet.
+    if (r.incomplete) {
+      return send(r.intent === 'meetup' ? 'Who should I set that up with, and roughly when? Try "when is pt free tomorrow".'
+        : r.intent === 'request' ? 'What are you looking for? Try "i want to buy a macbook".'
+          : 'What price should I try? Try "can u try 800".');
+    }
     if (r.intent === 'counter') {
       if (!waiting) return send("There's no deal waiting on you right now. If you meant to change a listing price, say which item.");
       await counterDeal(waiting, owner, Number(r.counter?.price), io, send);

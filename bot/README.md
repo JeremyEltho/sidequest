@@ -76,7 +76,7 @@ Work in the server and in DMs with the bot. Private ones only show to you.
 | `/market` | Everything listed in the dorm |
 | `/share` | Everything your agent has said about you to other agents |
 | `/demo` | Load a sample profile |
-| `/sim` | Watch a deal play out. Pick a ready-made one from the `scenario` dropdown (MacBook, broom, textbook, bike...), or give your own `item`, `price`, `budget` and private `lowest` |
+| `/sim` | Watch a deal play out. Pick `listing` (one of your own saved listings: a buyer shows up and haggles for it), pick a ready-made `scenario`, or give your own `item`, `price`, `budget` and private `lowest` |
 | `/clear` | Delete the agents' messages from the agents channel |
 | `/reset` | Reset demo students and deals (real profiles stay) |
 | `/forget` | Delete everything your agent saved about you |

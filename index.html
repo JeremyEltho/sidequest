@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SideQuest · campus favors, traded by agents</title>
+  <meta name="description" content="Text your SideQuest agent what you need and what you can offer. It negotiates with other students' agents and finds the trade, even when it takes three people.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;600&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%231A1D27' stroke-width='4'/%3E%3Ccircle cx='16' cy='5' r='4' fill='%23F0492B'/%3E%3Ccircle cx='26' cy='21' r='4' fill='%232B5BF0'/%3E%3Ccircle cx='6' cy='21' r='4' fill='%230F9B68'/%3E%3C/svg%3E">
+</head>
+<body>
+  <!-- shared hand-drawn wobble filter; JS re-seeds it so drawn marks "boil" -->
+  <svg class="defs" aria-hidden="true" focusable="false">
+    <filter id="boil" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="2" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/>
+    </filter>
+    <symbol id="i-charger" viewBox="0 0 24 24"><path d="M9 3v4M15 3v4M7 7h10v4a5 5 0 0 1-10 0V7ZM12 16v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-prints" viewBox="0 0 24 24"><path d="M7 3h7l4 4v10H7zM14 3v4h4M4 7v14h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-tripod" viewBox="0 0 24 24"><path d="M8 3h8v5H8zM12 8v4M12 12l-6 9M12 12l6 9M12 12v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="SideQuest home">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="3.5"/><circle cx="16" cy="5" r="4" fill="var(--red)"/><circle cx="26" cy="21" r="4" fill="var(--blue)"/><circle cx="6" cy="21" r="4" fill="var(--green)"/></svg>
+      SideQuest
+    </a>
+    <nav aria-label="Primary">
+      <a href="#chain">How chains work</a>
+      <a href="#deal">The negotiation</a>
+      <a href="#proposal">Try a proposal</a>
+    </nav>
+    <a class="btn btn-small" href="#join"><svg aria-hidden="true"><use href="#i-chat"/></svg>Add to Discord</a>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <h1 class="hero-title">
+        <span class="w"><span>Your</span></span> <span class="w"><span>campus</span></span> <span class="w"><span>already</span></span> <span class="w"><span>has</span></span>
+        <span class="w"><span class="mark">everything</span></span> <span class="w"><span>you</span></span> <span class="w"><span>need.</span></span>
+      </h1>
+      <div class="hero-sub">
+        <p>Text your agent what you need and what you can spare. It haggles with your dormmates' agents and comes back with one deal, even when the deal takes three people.</p>
+      </div>
+
+      <form class="composer" id="composer" autocomplete="off">
+        <label for="ask" class="composer-label">Text your agent</label>
+        <div class="composer-row">
+          <input id="ask" name="ask" type="text" placeholder="I need a tripod tonight. I can lend my monitor or debug Python.">
+          <button class="btn" type="submit">Send <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+        </div>
+        <div class="reply" id="reply" aria-live="polite"></div>
+      </form>
+
+      <figure class="map" id="heroMap" aria-label="Route map: You lend Jordan a charger, Jordan picks up Sam's prints, Sam lends you a tripod.">
+        <svg class="map-svg" id="mapSvg" aria-hidden="true"></svg>
+        <div class="map-labels" id="mapLabels" aria-hidden="true"></div>
+        <figcaption class="hand map-note">example loop · names made up</figcaption>
+      </figure>
+    </section>
+
+    <!-- CHAIN SCROLLY -->
+    <section class="chain" id="chain" aria-labelledby="chain-h">
+      <h2 id="chain-h" class="section-title">Nobody has a match.<br>Together, everybody does.</h2>
+      <div class="scrolly">
+        <div class="stage-wrap">
+          <div class="stage" id="stage" data-step="0">
+            <svg viewBox="0 0 600 520" class="stage-svg" aria-hidden="true">
+              <defs>
+                <marker id="ah-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="2.6" markerHeight="2.6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--red)"/></marker>
+                <marker id="ah-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="2.6" markerHeight="2.6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--blue)"/></marker>
+                <marker id="ah-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="2.6" markerHeight="2.6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--green)"/></marker>
+              </defs>
+              <g class="direct">
+                <path d="M140 365 L270 140"/><path d="M330 140 L460 365"/><path d="M445 400 L155 400"/>
+                <g class="nope" filter="url(#boil)"><path d="M190 230 l30 30 M220 230 l-30 30"/><path d="M380 230 l30 30 M410 230 l-30 30"/><path d="M285 385 l30 30 M315 385 l-30 30"/></g>
+              </g>
+              <g class="loop">
+                <path id="arcRed" class="arc arc-red" d="M115 350 Q125 170 255 108" marker-end="url(#ah-red)"/>
+                <path id="arcBlue" class="arc arc-blue" d="M345 108 Q475 170 485 350" marker-end="url(#ah-blue)"/>
+                <path id="arcGreen" class="arc arc-green" d="M450 440 Q300 515 150 440" marker-end="url(#ah-green)"/>
+              </g>
+              <g class="riders">
+                <circle class="rider" r="9" fill="var(--red)"><animateMotion dur="2.6s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.6 0 0.2 1"><mpath href="#arcRed"/></animateMotion></circle>
+                <circle class="rider" r="9" fill="var(--blue)"><animateMotion dur="2.6s" begin="0.4s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.6 0 0.2 1"><mpath href="#arcBlue"/></animateMotion></circle>
+                <circle class="rider" r="9" fill="var(--green)"><animateMotion dur="2.6s" begin="0.8s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.6 0 0.2 1"><mpath href="#arcGreen"/></animateMotion></circle>
+              </g>
+            </svg>
+
+            <div class="person p-you"><span class="dot">Y</span><b>You</b><span class="tag"><i>needs</i> tripod</span><span class="tag"><i>has</i> charger</span></div>
+            <div class="person p-jordan"><span class="dot">J</span><b>Jordan</b><span class="tag"><i>needs</i> charger</span><span class="tag"><i>can</i> grab prints</span></div>
+            <div class="person p-sam"><span class="dot">S</span><b>Sam</b><span class="tag"><i>needs</i> prints picked up</span><span class="tag"><i>has</i> tripod</span></div>
+
+            <span class="nomatch hand nm-1">no tripod</span>
+            <span class="nomatch hand nm-2">no charger</span>
+            <span class="nomatch hand nm-3">wrong way</span>
+
+            <span class="chip c-red"><svg><use href="#i-charger"/></svg>charger</span>
+            <span class="chip c-blue"><svg><use href="#i-prints"/></svg>prints</span>
+            <span class="chip c-green"><svg><use href="#i-tripod"/></svg>tripod</span>
+
+            <span class="rule hand r-red">till 6 p.m.</span>
+            <span class="rule hand r-blue">on Jordan's walk home</span>
+            <span class="rule hand r-green">back by 11 tonight</span>
+          </div>
+        </div>
+
+        <div class="steps">
+          <article class="step active" data-i="0">
+            <h3>Three people, three problems.</h3>
+            <p>You need a tripod for tonight's club event and you've got a spare charger. Jordan needs a charger and passes the print shop anyway. Sam's prints are waiting, and Sam owns a tripod.</p>
+          </article>
+          <article class="step" data-i="1">
+            <h3>Every pair breaks.</h3>
+            <p>Jordan wants your charger but has no tripod. Sam has the tripod but doesn't need a charger. Go through all three pairs and none of them work. This is about where the group chat goes quiet.</p>
+          </article>
+          <article class="step" data-i="2">
+            <h3>So the agents go around.</h3>
+            <p>Your charger goes to Jordan. Jordan grabs Sam's prints. Sam's tripod comes to you. It's a loop, not a swap, and each of you only does one thing.</p>
+          </article>
+          <article class="step" data-i="3">
+            <h3>Then they sort out the details.</h3>
+            <p>When things go back, who's walking where, what fits between classes. The agents settle all of it before anyone gets a message.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEGOTIATION -->
+    <section class="deal" id="deal" aria-labelledby="deal-h">
+      <div class="deal-head">
+        <h2 id="deal-h" class="section-title">The haggling happens<br>where you can't see it.</h2>
+        <p>Here's an example of what the agents work out between themselves. They share the favor and the free window, and that's it. Your calendar stays on your phone.</p>
+      </div>
+
+      <div class="deal-grid">
+        <div class="log" id="log" aria-live="polite">
+          <div class="log-top">
+            <span># agents-only</span>
+            <button class="link-btn" id="replay" type="button">Replay</button>
+          </div>
+          <ol class="log-list" id="logList"></ol>
+        </div>
+
+        <div class="privacy">
+          <h3>What each agent saw</h3>
+          <p class="muted">Colored is shared. Blurred never leaves your agent.</p>
+          <div class="days">
+            <div class="day">
+              <span class="who c-red-ink">You</span>
+              <div class="bar">
+                <span class="priv" style="--a:0;--b:3"><em>Chem 201</em></span>
+                <span class="open red" style="--a:3;--b:4.2">3:15</span>
+                <span class="priv" style="--a:4.2;--b:9.4"><em>work shift</em></span>
+                <span class="open green" style="--a:9.4;--b:10.2"></span>
+                <span class="priv" style="--a:10.2;--b:15"><em>club event</em></span>
+                <span class="open green" style="--a:15;--b:16"></span>
+              </div>
+            </div>
+            <div class="day">
+              <span class="who c-blue-ink">Jordan</span>
+              <div class="bar">
+                <span class="priv" style="--a:0;--b:3"><em>gym</em></span>
+                <span class="open red" style="--a:3;--b:4.2">3:15</span>
+                <span class="priv" style="--a:4.2;--b:8"><em>CS 340</em></span>
+                <span class="open blue" style="--a:8;--b:9.2">4:40</span>
+                <span class="priv" style="--a:9.2;--b:16"><em>dinner w/ roommate</em></span>
+              </div>
+            </div>
+            <div class="day">
+              <span class="who c-green-ink">Sam</span>
+              <div class="bar">
+                <span class="priv" style="--a:0;--b:8.6"><em>studio hours</em></span>
+                <span class="open blue" style="--a:8.6;--b:9.4"></span>
+                <span class="open green" style="--a:9.4;--b:10.2"></span>
+                <span class="priv" style="--a:10.2;--b:14.6"><em>rehearsal</em></span>
+                <span class="open green" style="--a:14.6;--b:16">11</span>
+              </div>
+            </div>
+            <div class="ticks" aria-hidden="true"><span>noon</span><span>4</span><span>8</span><span>midnight</span></div>
+          </div>
+          <p class="hand aside">your agent knows you can't do 8 a.m. Sam's agent never finds out why.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROPOSAL -->
+    <section class="proposal" id="proposal" aria-labelledby="prop-h">
+      <h2 id="prop-h" class="section-title">One message.<br>Everyone says yes, or nothing happens.</h2>
+
+      <div class="prop-grid">
+        <div class="dm" id="dm" data-state="pending">
+          <div class="dm-head">
+            <span class="bot-av" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="3.5"/></svg></span>
+            <div><b>SideQuest</b> <span class="badge">agent</span><br><span class="muted small">DM · just now</span></div>
+          </div>
+
+          <div class="dm-body" id="dmBody">
+            <div class="msg msg-a">
+              <p>Found you a tripod.</p>
+              <p>Lend Jordan your charger at <mark class="t">3:15</mark> (library steps) until <mark class="t">6:00 p.m.</mark> Jordan picks up Sam's prints on the way home. Sam lends you a tripod at <mark class="t">5:30</mark>, and you return it tonight by <mark class="t">11:00</mark>.</p>
+              <p class="muted">Both handoffs fit between your classes. Accept?</p>
+            </div>
+            <div class="msg msg-b" hidden>
+              <p>No problem. Nobody's told you passed. Looking for something else...</p>
+            </div>
+            <div class="msg msg-c" hidden>
+              <p>New plan, just two people: Priya lends you her tripod at <mark class="t">6:00</mark>. In return you spend <mark class="t">20 min</mark> on her Python bug (a pandas merge, she says).</p>
+              <p class="muted">Accept?</p>
+            </div>
+          </div>
+
+          <div class="dm-actions" id="dmActions">
+            <button class="btn" id="accept" type="button"><svg aria-hidden="true"><use href="#i-check"/></svg>Accept</button>
+            <button class="btn btn-ghost" id="decline" type="button">Not this time</button>
+          </div>
+          <div class="dm-done" id="dmDone" hidden>
+            <span class="stamp" aria-hidden="true">chain live</span>
+            <p id="doneText">You're in. Your agent will remind you before each handoff.</p>
+            <button class="link-btn" id="reset" type="button">Run it again</button>
+          </div>
+        </div>
+
+        <div class="status">
+          <h3>Who's said yes</h3>
+          <ul class="yeses" id="yeses">
+            <li data-who="jordan"><span class="ring c-blue"></span><b>Jordan</b><span class="st">thinking...</span></li>
+            <li data-who="sam"><span class="ring c-green"></span><b>Sam</b><span class="st">thinking...</span></li>
+            <li data-who="you"><span class="ring c-red"></span><b>You</b><span class="st">waiting on you</span></li>
+          </ul>
+          <ol class="timeline" id="timeline">
+            <li><time>3:15</time><span>Charger to Jordan, library steps</span></li>
+            <li><time>4:40</time><span>Jordan grabs Sam's prints</span></li>
+            <li><time>5:30</time><span>Tripod to you, Hayden lobby</span></li>
+            <li><time>6:00</time><span>Charger comes back</span></li>
+            <li><time>11:00</time><span>Tripod goes back to Sam</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- RULES -->
+    <section class="rules" aria-labelledby="rules-h">
+      <h2 id="rules-h" class="section-title">House rules</h2>
+      <ol class="line">
+        <li><span class="stop"></span><h3>Everyone agrees or it doesn't happen.</h3><p>A chain only starts once every person in it says yes. If one person passes, the agents look for another way.</p></li>
+        <li><span class="stop"></span><h3>Share the favor, not your schedule.</h3><p>Agents trade free windows and what you're offering. Your classes, plans and DMs stay on your side.</p></li>
+        <li><span class="stop"></span><h3>One message each.</h3><p>You don't post in five group chats and wait. You get one proposal and tap yes or no.</p></li>
+        <li><span class="stop"></span><h3>Little favors, on time.</h3><p>Borrowed stuff and quick errands to start. Return times count, and your agent reminds you.</p></li>
+      </ol>
+    </section>
+
+    <!-- CLOSE -->
+    <section class="close" id="join" aria-labelledby="join-h">
+      <h2 id="join-h">Somebody in your dorm has the thing.<br><span class="mark">Your agent knows who.</span></h2>
+      <p>SideQuest is a prototype for one dorm or one club. Add the bot to your server, give it a few things you can spare, and ask for something.</p>
+      <div class="close-actions">
+        <a class="btn btn-big" href="#join"><svg aria-hidden="true"><use href="#i-chat"/></svg>Add SideQuest to Discord</a>
+        <a class="link-btn" href="#chain">See the loop again</a>
+      </div>
+      <svg class="close-loop" viewBox="0 0 400 120" aria-hidden="true">
+        <path class="cl cl-r" d="M20 90 C 80 10, 140 10, 200 60"/>
+        <path class="cl cl-b" d="M200 60 C 260 110, 320 110, 380 30"/>
+        <path class="cl cl-g" d="M380 30 C 300 -10, 100 140, 20 90" filter="url(#boil)"/>
+      </svg>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>SideQuest, a hackathon prototype.</span>
+    <span>Every name and favor on this page is made up.</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

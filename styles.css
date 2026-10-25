@@ -578,3 +578,6 @@ mark.t { background: none; color: inherit; font: 600 .95em var(--mono); padding:
 @media (max-width: 900px) {
   .reel-grid { grid-template-columns: 1fr; }
 }
+
+.reel-list .reel-group { font: 600 .78rem var(--mono); color: var(--ink-2); text-transform: uppercase; letter-spacing: .05em; padding: 14px 4px 2px; }
+.reel-list .reel-group:first-child { padding-top: 0; }

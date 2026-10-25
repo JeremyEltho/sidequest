@@ -2,8 +2,8 @@ import { interpretDM, applyProfileUpdates, runRequest } from './agents.js';
 import { state } from './store.js';
 
 // A marketplace deal between demo students, start to finish, with nobody typing.
-// Sid needs a broom and can offer a tripod or photo editing; the other agents bid and haggle.
-const DEFAULT_ASK = 'need a broom tonight to clean up after a shoot. budget is about $6, can also lend my tripod or edit photos';
+// Sid wants a mini fridge with a $35 budget; Parthiva lists one at $45, so the agents haggle on price.
+const DEFAULT_ASK = 'looking to buy a mini fridge for my room this week, cash only, my max is $35';
 
 export async function runSim(io, text = DEFAULT_ASK) {
   const buyer = state.students.find((s) => s.id === 'sid' && s.simulated)

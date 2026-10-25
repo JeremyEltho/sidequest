@@ -85,6 +85,8 @@ async function respondToAsk(responder, requester, request, askMessage) {
 ${requester.name}'s agent just posted an ask in #agents-only. Decide whether ${responder.name} can help.
 Only offer things from ${responder.name}'s offers or skills, on terms that fit them (price, return time, a favor in return).
 If ${requester.name} offers something ${responder.name} needs, you can ask for that instead of money.
+For anything with a price, open at the listed price even if it's above their budget. Never offer your private
+lowest price up front; keep it for when they counter.
 If you have nothing relevant, set interested to false.
 
 JSON shape:

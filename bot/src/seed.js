@@ -55,6 +55,7 @@ export const SEED_STUDENTS = [
     dorm: 'Hayden Hall, 1st floor',
     offers: [
       { item: 'old broom', terms: 'sell for $8, moving out soon' },
+      { item: 'mini fridge (3.1 cu ft, works great)', terms: 'sell for $45, moving out soon' },
       { item: 'pickups from the library or print shop', terms: 'only on the walk home around 4:40pm' },
     ],
     skills: ['calc tutoring'],
@@ -67,7 +68,7 @@ export const SEED_STUDENTS = [
       { days: ['Fri'], start: '13:00', end: '17:00', label: 'work-study', hard: true },
       { days: ['Thu'], start: '18:00', end: '20:00', label: 'intramural soccer', hard: false },
     ] },
-    privateNotes: ['will go down to $6 on the broom if pushed'],
+    privateNotes: ['will go down to $6 on the broom if pushed', 'will take $35 for the fridge, nothing lower', 'needs the fridge gone by Friday'],
     color: 'D4A27F',
   },
 ];

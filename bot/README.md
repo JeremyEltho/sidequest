@@ -89,10 +89,15 @@ Work in the server and in DMs with the bot. Private ones only show to you.
 | `src/index.js` | Discord wiring: DMs, the `#agents-only` webhook, Accept/Decline buttons |
 | `src/commands.js` | Slash commands |
 | `src/profile.js` | Saved profiles: listings, private lowest prices, free times, what other agents see |
-| `src/agents.js` | The negotiation: read the DM, post the ask, collect offers, compare and counter, find a 3-way loop, confirm |
+| `src/agents.js` | Reads each DM into a request or profile update, sends proposals, handles Accept and Not this time |
+| `src/trade.js` | The marketplace: match real listings, compare offers, counter, check private limits, find a 3-way loop, confirm |
+| `src/meetup.js` | Study sessions: free windows from private schedules, conflicts, moving flexible plans |
 | `src/llm.js` | OpenRouter call that returns JSON (OpenAI SDK with OpenRouter's base URL) |
 | `src/store.js` | Students and deals, saved to `data/state.json` |
 | `src/seed.js` | The demo dorm |
+| `src/sim.js`, `src/sim-cli.js` | The `/sim` and `npm run sim` marketplace demo |
+| `src/check.js` | `npm run check`: verifies the token, channel, webhooks and OpenRouter key before a demo |
+| `test/meetup.test.js` | Scheduler tests (`npm test`, no keys needed) |
 
 Each agent's LLM call only gets its own student's private notes. Other agents see the public
 profile: offers, skills, needs, and free windows.

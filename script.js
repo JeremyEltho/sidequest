@@ -164,7 +164,7 @@ const examples = [
   'I need a tripod tonight. I can lend my monitor or debug Python.',
   'Need someone to grab my laundry card. Can lend an HDMI cable.',
   'Anyone have a calculator for tomorrow? I can proofread essays.',
-  'Can someone grab my package? I walk past the library at 2 if you need anything.',
+  'Find a time this week to study for CSE 310 with Sam and Priya.',
 ];
 if (!reduced) {
   (async function cycle() {
@@ -200,9 +200,16 @@ $('#composer').addEventListener('submit', async (e) => {
   t.style.padding = '0';
   await wait(1300);
   t.remove();
-  bubble('Got it. Asking around now. 14 agents in your dorm, 0 direct matches.');
-  await wait(1100);
-  bubble('Found a 3-way loop with Jordan and Sam, and every handoff fits your day. <a href="#chain">See how it works</a>');
+  if (/study|session|meet|schedule|plan|free/i.test(text)) {
+    bubble('On it. Asking Sam and Priya\'s agents for free windows. Nobody\'s calendar gets shared.');
+    await wait(1100);
+    bubble('Found a time that works for all three of you. <a href="#schedule">Watch them work it out</a>');
+    runPreset('wed');
+  } else {
+    bubble('Got it. Asking around now. 14 agents in your dorm, 0 direct matches.');
+    await wait(1100);
+    bubble('Found a 3-way loop with Jordan and Sam, and every handoff fits your day. <a href="#chain">See how it works</a>');
+  }
   btn.disabled = false;
 });
 
@@ -356,3 +363,170 @@ $('#reset').addEventListener('click', () => {
   $$('li', timeline).forEach((i) => i.classList.remove('lit'));
   startProposal();
 });
+
+/* ---------- study sessions: same scheduling as the bot (bot/src/meetup.js) ---------- */
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const H0 = 8 * 60, H1 = 24 * 60; // the week view runs 8am to midnight
+const toMin = (t) => { const [h, m = '0'] = t.split(':'); return +h * 60 + +m; };
+const clock = (min) => {
+  if (min >= 24 * 60) return 'midnight';
+  const h = Math.floor(min / 60), m = min % 60;
+  return `${((h + 11) % 12) + 1}${m ? `:${String(m).padStart(2, '0')}` : ''}${h >= 12 ? 'pm' : 'am'}`;
+};
+const span = (w) => `${w.day} ${clock(w.start)}-${clock(w.end)}`;
+
+// Demo schedules. In the bot these stay with each student's own agent.
+const PEOPLE = {
+  you: { name: 'You', c: 'var(--red)', hours: ['10:00', '24:00'], busy: [
+    { days: ['Mon', 'Wed', 'Fri'], start: '10:00', end: '11:00', label: 'CSE 310 lecture', hard: true },
+    { days: ['Tue', 'Thu'], start: '18:00', end: '21:00', label: 'library shift', hard: true },
+  ] },
+  sam: { name: 'Sam', c: 'var(--blue)', hours: ['08:00', '24:00'], busy: [
+    { days: DAYS, start: '08:00', end: '16:00', label: 'class, then studio', hard: true },
+    { days: ['Wed'], start: '19:00', end: '21:00', label: 'rehearsal', hard: true },
+  ] },
+  priya: { name: 'Priya', c: 'var(--green)', hours: ['09:00', '23:00'], busy: [
+    { days: ['Tue', 'Thu'], start: '14:00', end: '17:00', label: 'Orgo lab', hard: true },
+    { days: ['Mon'], start: '18:00', end: '20:00', label: 'team dinner', hard: false },
+  ] },
+};
+const PRESETS = {
+  wed: { who: ['you', 'sam', 'priya'], dur: 120, day: 'Wed', earliest: '18:00', text: '2-hour CSE 310 session Wednesday night with Sam and Priya', when: 'Wednesday night' },
+  sam: { who: ['you', 'sam'], dur: 90, day: 'Wed', at: '19:00', text: 'study Wednesday at 7pm with Sam', when: 'Wednesday at 7pm' },
+  priya: { who: ['you', 'priya'], dur: 90, day: 'Mon', at: '18:00', text: 'study Monday at 6pm with Priya', when: 'Monday at 6pm' },
+};
+
+function freeWindows(p, soft = true) {
+  const [open, close] = p.hours.map(toMin);
+  const out = [];
+  for (const day of DAYS) {
+    let free = [{ start: open, end: close }];
+    for (const b of p.busy) {
+      if (!b.days.includes(day) || (!b.hard && !soft)) continue;
+      const bs = toMin(b.start), be = toMin(b.end);
+      free = free.flatMap((f) => (be <= f.start || bs >= f.end ? [f]
+        : [{ start: f.start, end: bs }, { start: be, end: f.end }].filter((x) => x.end - x.start >= 30)));
+    }
+    out.push(...free.map((f) => ({ day, ...f })));
+  }
+  return out;
+}
+
+function overlaps(lists, dur, pref) {
+  const exact = pref.at ? toMin(pref.at) : null;
+  const after = exact ?? (pref.earliest ? toMin(pref.earliest) : 0);
+  const slots = [];
+  for (const day of DAYS) {
+    let common = [{ start: 0, end: 24 * 60 }];
+    for (const ws of lists) {
+      const next = [];
+      for (const a of common) for (const b of ws.filter((w) => w.day === day)) {
+        const s = Math.max(a.start, b.start), e = Math.min(a.end, b.end);
+        if (e > s) next.push({ start: s, end: e });
+      }
+      common = next;
+    }
+    for (const c of common) {
+      if (c.end - c.start < dur) continue;
+      const s = c.start < after && c.end - after >= dur ? after : c.start;
+      slots.push({ day, start: s, end: s + dur });
+    }
+  }
+  const off = (s) => (s.day !== pref.day ? 1e5 : 0) + (exact != null ? Math.abs(s.start - exact) : s.start < after ? 1e4 : 0);
+  return slots.sort((a, b) => off(a) - off(b) || DAYS.indexOf(a.day) - DAYS.indexOf(b.day) || a.start - b.start);
+}
+
+const pos = (a, b) => `--s:${(Math.max(a, H0) - H0) / (H1 - H0)};--w:${(Math.min(b, H1) - Math.max(a, H0)) / (H1 - H0)}`;
+const week = $('#week');
+const schedLog = $('#schedLog');
+
+function drawWeek(ids, prefDay) {
+  const key = `<div class="who-key">${ids.map((id) => `<span style="--c:${PEOPLE[id].c}"><i></i>${PEOPLE[id].name}</span>`).join('')}</div>`;
+  const hours = `<div class="wk-hours"><span>8am</span><span>noon</span><span>4pm</span><span>8pm</span><span>midnight</span></div>`;
+  const rows = DAYS.map((day) => {
+    const lanes = ids.map((id) => {
+      const p = PEOPLE[id];
+      const free = freeWindows(p).filter((w) => w.day === day)
+        .map((w) => `<span class="free" style="${pos(w.start, w.end)};--c:${p.c}"></span>`).join('');
+      const busy = p.busy.filter((b) => b.days.includes(day))
+        .map((b) => `<span class="${b.hard ? 'busy' : 'soft'}" data-soft="${b.hard ? '' : id}" style="${pos(toMin(b.start), toMin(b.end))}">${b.hard ? `<em>${b.label}</em>` : ''}</span>`).join('');
+      return `<div class="lane" title="${p.name}">${free}${busy}</div>`;
+    }).join('');
+    return `<div class="wk-day${day === prefDay ? ' pref' : ''}" data-day="${day}"><b>${day}</b><div class="lanes hidden">${lanes}</div></div>`;
+  }).join('');
+  week.innerHTML = key + hours + rows;
+}
+
+function logLine(html, cls = '') {
+  const li = document.createElement('li');
+  if (cls) li.className = cls;
+  li.innerHTML = html;
+  schedLog.appendChild(li);
+}
+
+function mark(cls, slot) {
+  const lanes = $(`.wk-day[data-day="${slot.day}"] .lanes`, week);
+  const m = document.createElement('span');
+  m.className = cls;
+  m.setAttribute('style', pos(slot.start, slot.end));
+  lanes.appendChild(m);
+}
+
+let schedRun = 0;
+async function runPreset(key) {
+  const run = ++schedRun;
+  const pr = PRESETS[key];
+  const live = () => run === schedRun;
+  $$('.preset').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.preset === key)));
+  schedLog.innerHTML = '';
+  drawWeek(pr.who, pr.day);
+  const pref = { day: pr.day, at: pr.at, earliest: pr.earliest };
+  const fits = (s) => s && s.day === pr.day && (pr.at ? s.start === toMin(pr.at) : !pr.earliest || s.start >= toMin(pr.earliest));
+  const names = pr.who.map((id) => PEOPLE[id].name);
+
+  logLine(pr.text, 'me');
+  await wait(600); if (!live()) return;
+  logLine(`<b>Your agent</b> asks ${names.slice(1).join(' and ')}'s agent${names.length > 2 ? 's' : ''} for free windows.`);
+
+  // Each agent shares its student's free windows: the lanes fill in one by one.
+  for (const [i, lanes] of $$('.lanes', week).entries()) {
+    setTimeout(() => lanes.classList.remove('hidden'), reduced ? 0 : i * 120);
+  }
+  await wait(1300); if (!live()) return;
+  logLine(`Every agent shared free time only. The blurred blocks never left their owner's agent.`);
+
+  let slots = overlaps(pr.who.map((id) => freeWindows(PEOPLE[id])), pr.dur, pref);
+  let note = '';
+  if (!fits(slots[0])) {
+    await wait(900); if (!live()) return;
+    const asked = { day: pr.day, start: pr.at ? toMin(pr.at) : toMin(pr.earliest), end: (pr.at ? toMin(pr.at) : toMin(pr.earliest)) + pr.dur };
+    mark('ask', asked);
+    logLine(`<b>Conflict:</b> nothing works for everyone ${pr.when}. Agents check what can move.`, 'warn');
+    await wait(1200); if (!live()) return;
+    const flexed = overlaps(pr.who.map((id) => freeWindows(PEOPLE[id], false)), pr.dur, pref);
+    if (fits(flexed[0])) {
+      const movers = pr.who.filter((id) => !freeWindows(PEOPLE[id]).some((w) => w.day === flexed[0].day && w.start <= flexed[0].start && w.end >= flexed[0].end));
+      movers.forEach((id) => $$(`.wk-day[data-day="${flexed[0].day}"] [data-soft="${id}"]`, week).forEach((el) => el.classList.add('moved')));
+      logLine(`<b>${movers.map((id) => PEOPLE[id].name).join(' and ')}'s agent:</b> "I can move something to make it work." (never says what)`);
+      slots = flexed;
+      note = 'A flexible plan moved. Fixed ones never do.';
+    } else {
+      const holdouts = pr.who.filter((id) => !overlaps([freeWindows(PEOPLE[id], false)], pr.dur, pref).some(fits));
+      logLine(`<b>Can't move it:</b> ${holdouts.map((id) => PEOPLE[id].name).join(' and ')} ${holdouts.length > 1 ? 'have' : 'has'} something fixed then. Nobody says what.`, 'warn');
+      note = 'Closest time that works for everyone.';
+    }
+  }
+
+  await wait(1000); if (!live()) return;
+  const slot = slots[0];
+  mark('slot', slot);
+  logLine(`<b>Found it:</b> ${span(slot)}. ${note ? `${note} ` : ''}Everyone gets one message to approve.`, 'ok');
+}
+
+$('#presets').addEventListener('click', (e) => {
+  const b = e.target.closest('.preset');
+  if (b) runPreset(b.dataset.preset);
+});
+drawWeek(PRESETS.wed.who, 'Wed');
+$$('.lanes', week).forEach((l) => l.classList.remove('hidden'));
+once(week, () => runPreset('wed'), '-20%');

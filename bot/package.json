@@ -1,0 +1,21 @@
+{
+  "name": "sidequest-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SideQuest Discord bot: personal agents that negotiate campus favors with each other.",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "reset": "node src/store.js --reset"
+  },
+  "dependencies": {
+    "discord.js": "^14.27.0",
+    "dotenv": "^18.0.9",
+    "openai": "^7.43.0"
+  }
+}

@@ -26,7 +26,7 @@ if (!reduced) {
 const LAYOUTS = {
   wide: {
     box: [1200, 380],
-    st: { you: [160, 250], jordan: [600, 90], sam: [1040, 250] },
+    st: { you: [160, 250], parthiva: [600, 90], sid: [1040, 250] },
     lines: {
       red: 'M160 250 H330 L490 90 H600',
       blue: 'M600 90 H710 L870 250 H1040',
@@ -34,13 +34,13 @@ const LAYOUTS = {
     },
     labels: {
       you: ['up', 'needs a tripod'],
-      jordan: ['up', 'needs a charger'],
-      sam: ['up', 'needs prints picked up'],
+      parthiva: ['up', 'needs a charger'],
+      sid: ['up', 'needs prints picked up'],
     },
   },
   tall: {
     box: [400, 600],
-    st: { you: [110, 80], jordan: [300, 300], sam: [110, 520] },
+    st: { you: [110, 80], parthiva: [300, 300], sid: [110, 520] },
     lines: {
       red: 'M110 80 H200 L300 180 V300',
       blue: 'M300 300 V420 L200 520 H110',
@@ -48,8 +48,8 @@ const LAYOUTS = {
     },
     labels: {
       you: ['side', 'needs a tripod'],
-      jordan: ['left', 'needs a charger'],
-      sam: ['side', 'needs prints'],
+      parthiva: ['left', 'needs a charger'],
+      sid: ['side', 'needs prints'],
     },
   },
 };

@@ -83,6 +83,24 @@ const io = {
   },
 };
 
+async function clearAgentsChannel() {
+  const h = await agentsHook();
+  const channel = await client.channels.fetch(process.env.AGENTS_CHANNEL_ID);
+  const messages = await channel.messages.fetch({ limit: 100 });
+  let n = 0;
+  for (const m of messages.values()) {
+    try {
+      if (m.webhookId === h.id) await h.deleteMessage(m.id);
+      else if (m.author.id === client.user.id) await m.delete();
+      else continue;
+      n++;
+    } catch (err) {
+      console.error('could not delete', m.id, err.message);
+    }
+  }
+  return n;
+}
+
 client.once(Events.ClientReady, async (c) => {
   console.log(`SideQuest is online as ${c.user.tag} (model: ${MODEL})`);
   try {
@@ -101,6 +119,12 @@ client.on(Events.MessageCreate, async (msg) => {
     // Public demo: a whole marketplace deal between demo students, played out in the agents channel.
     await msg.reply('Running a marketplace deal in the agents channel 👀').catch(() => {});
     return runSim(io, text.replace(/^!sim\s*/i, '') || undefined).catch((err) => console.error(err));
+  }
+  if (/^!clear$/i.test(text)) {
+    // Reset the agents channel between demos: removes what the bot and its agents posted, nothing else.
+    const n = await clearAgentsChannel();
+    if (isDM) return msg.reply(`Cleared ${n} agent messages from the agents channel.`);
+    return msg.delete().catch(() => {});
   }
   if (!isDM) {
     // In a server channel, only react to a !command or an @mention, and move the conversation to DMs

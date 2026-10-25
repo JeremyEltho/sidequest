@@ -154,6 +154,11 @@ async function handleText(owner, text, send) {
   busy.add(owner.id);
   try {
     const r = await interpretDM(owner, text);
+    // Asking for something never rewrites your week: only an "update" can change free times or commitments.
+    // A request can still add what you offer in return ("I can debug Python").
+    if (r.intent === 'request' || r.intent === 'meetup') {
+      delete r.setFree; delete r.addBusy; delete r.clearBusy; delete r.removeOffers;
+    }
     applyProfileUpdates(owner, r);
     if (r.reply) await send(r.reply);
     if (r.intent === 'request' && r.request?.item) {

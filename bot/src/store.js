@@ -108,6 +108,8 @@ export function demoProfile(s) {
     courses: ['CSE 310'],
     availability: 'afternoons and late evenings',
     privateNotes: ["can't do anything before 10am"],
+    needs: [],
+    sharedLog: [],
     schedule: { hours: ['10:00', '24:00'], free: [
       { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], start: '11:00', end: '24:00' },
       { days: ['Sat', 'Sun'], start: '12:00', end: '24:00' },

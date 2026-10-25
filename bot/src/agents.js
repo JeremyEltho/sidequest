@@ -113,7 +113,7 @@ export async function approve(deal, s, io) {
   if (deal.slot) {
     await io.post(owner, `✅ locked: ${deal.request?.topic ?? 'meetup'}, ${deal.slot.label} at ${deal.slot.place}. ${who}, see you there.`);
   } else {
-    await io.post(owner, `✅ locked\n${deal.lines.map((l) => `• ${l}`).join('\n')}\nhandoff details go to ${who} by DM.`);
+    await io.post(owner, `✅ locked\n${deal.lines.map((l) => `• ${l}`).join('\n')}\n${deal.simulation ? '(simulated deal, no DMs sent)' : `handoff details go to ${who} by DM.`}`);
   }
   for (const id of deal.participants) {
     const p = state.students.find((x) => x.id === id);

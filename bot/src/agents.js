@@ -16,7 +16,8 @@ ${s.name}'s private notes (only you know these). Use them to decide, but never r
 You may say a time doesn't work; never say why.
 ${JSON.stringify(s.privateNotes)}
 
-Voice: short and casual, like a college student texting. One to three sentences. At most one emoji. Never make up items ${s.name} doesn't have.`;
+Voice: short and casual, like a college student texting. One to three sentences. At most one emoji. Never make up items ${s.name} doesn't have.
+Refer to students by name or as they/them; never guess anyone's pronouns.`;
 }
 
 /** Work out what the owner wants from a DM. */

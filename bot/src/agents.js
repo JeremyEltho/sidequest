@@ -1,5 +1,8 @@
 import { askJSON } from './llm.js';
-import { state, save, publicProfile, byName, newDeal } from './store.js';
+import { state, save, byName, newDeal } from './store.js';
+import { publicProfile, privateProfile, applyProfileUpdates } from './profile.js';
+
+export { applyProfileUpdates };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const beat = () => sleep(900 + Math.random() * 1400);
@@ -12,9 +15,9 @@ Look out for ${s.name}, but be fair and friendly: the goal is a deal everyone ac
 ${s.name}'s public profile (other agents can see this):
 ${JSON.stringify(publicProfile(s), null, 2)}
 
-${s.name}'s private notes (only you know these). Use them to decide, but never repeat the details to other agents.
-You may say a time doesn't work; never say why.
-${JSON.stringify(s.privateNotes)}
+What only you know about ${s.name}. Use it to decide, but never repeat it to other agents.
+You may say a time doesn't work; never say why. Never reveal a lowest price; you can come down to it when countered.
+${JSON.stringify(privateProfile(s), null, 2)}
 
 Voice: short and casual, like a college student texting. One to three sentences. At most one emoji. Never make up items ${s.name} doesn't have.
 Refer to students by name or as they/them ("${s.name}'s free...", "they can..."). Never write he, she, him, her, his, or hers about anyone.`;
@@ -32,14 +35,21 @@ ${owner.name} just DMed you. Work out what they want.
 - "status": they're asking what you know about them or what's going on.
 - "chat": anything else.
 A request often also says what they can give in return; record that under addOffers/addSkills too.
-Schedule facts (classes, work, plans) go in addBusy (days Mon..Sun, 24-hour times; hard = class, shift, exam; soft = habits and plans that could move), never in offers.
+Listings go in addOffers: kind is sell, lend, rent, give or service; price is what they're asking; floor is a lowest
+price only if they said one ("won't go under $35"). To take a listing down, put its name in removeOffers.
+Usual free times ("I'm usually free weekdays after 6") go in setFree and replace the old ones.
+Commitments (classes, work, plans) go in addBusy: days Mon..Sun, 24-hour times, hard = class, shift or exam,
+soft = habits and plans that could move. Never put a commitment in offers. Course codes go in addCourses.
 
 JSON shape:
 {
   "intent": "request" | "meetup" | "update" | "status" | "chat",
   "request": { "item": string, "details": string, "neededBy": string, "returnBy": string | null, "maxBudget": number | null, "offering": string[] } | null,
   "meetup": { "topic": string, "with": string[], "course": string | null, "when": string, "durationMin": number, "preferredDays": string[], "earliest": "HH:MM" | null, "at": "HH:MM" | null, "place": string | null } | null,
-  "addOffers": [{ "item": string, "terms": string }],
+  "addOffers": [{ "item": string, "kind": "sell" | "lend" | "rent" | "give" | "service", "price": number | null, "floor": number | null, "terms": string }],
+  "removeOffers": string[],
+  "setFree": [{ "days": string[], "start": "HH:MM", "end": "HH:MM" }] | null,
+  "addCourses": string[],
   "addSkills": string[],
   "addNeeds": string[],
   "privateNotes": string[],
@@ -52,18 +62,6 @@ For a meetup, preferredDays uses Mon..Sun, durationMin defaults to 90, earliest 
     text,
     { temperature: 0.3 },
   );
-}
-
-export function applyProfileUpdates(owner, r) {
-  const has = (list, item) => list.some((x) => (x.item || x).toLowerCase() === item.toLowerCase());
-  for (const o of r.addOffers || []) if (o?.item && !has(owner.offers, o.item)) owner.offers.push(o);
-  for (const k of r.addSkills || []) if (k && !owner.skills.includes(k)) owner.skills.push(k);
-  for (const n of r.addNeeds || []) if (n && !owner.needs.includes(n)) owner.needs.push(n);
-  for (const p of r.privateNotes || []) if (p && !owner.privateNotes.includes(p)) owner.privateNotes.push(p);
-  if (r.availability) owner.availability = r.availability;
-  owner.schedule ||= { hours: ['09:00', '23:00'], busy: [] };
-  for (const b of r.addBusy || []) if (b?.days?.length && b.start && b.end) owner.schedule.busy.push(b);
-  save();
 }
 
 async function composeAsk(owner, request) {
@@ -85,6 +83,7 @@ async function respondToAsk(responder, requester, request, askMessage) {
 ${requester.name}'s agent just posted an ask in #agents-only. Decide whether ${responder.name} can help.
 Only offer things from ${responder.name}'s offers or skills, on terms that fit them (price, return time, a favor in return).
 If ${requester.name} offers something ${responder.name} needs, you can ask for that instead of money.
+Only ask for things on ${responder.name}'s own needs list; never ask for something ${requester.name} needs.
 For anything with a price, open at the listed price even if it's above their budget. Never offer your private
 lowest price up front; keep it for when they counter.
 If you have nothing relevant, set interested to false.

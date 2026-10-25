@@ -25,8 +25,26 @@ export function save() {
   writeFileSync(DATA, JSON.stringify(state, null, 2));
 }
 
+/** Put the demo students and deals back. Real students keep their saved profiles. */
 export function reset() {
-  Object.assign(state, fresh());
+  const keep = state.students.filter((s) => s.discordId && !s.simulated);
+  const next = fresh();
+  for (const k of keep) {
+    const i = next.students.findIndex((x) => x.id === k.id);
+    if (i === -1) next.students.push(k);
+    else next.students[i] = k;
+  }
+  Object.assign(state, next);
+  save();
+}
+
+/** Delete one real student's saved profile. A linked teammate goes back to their demo profile. */
+export function forget(s) {
+  const seeded = SEED_STUDENTS.find((x) => x.id === s.id);
+  const i = state.students.indexOf(s);
+  if (i === -1) return;
+  if (seeded) state.students[i] = structuredClone(seeded);
+  else state.students.splice(i, 1);
   save();
 }
 
@@ -80,32 +98,23 @@ export function logShared(s, text) {
 export function demoProfile(s) {
   Object.assign(s, {
     offers: [
-      { item: 'USB-C laptop charger', terms: 'lend for an afternoon' },
-      { item: '27-inch monitor', terms: 'lend for a weekend' },
+      { item: 'USB-C laptop charger', kind: 'lend', price: null, floor: null, terms: 'for an afternoon' },
+      { item: '27-inch monitor', kind: 'lend', price: null, floor: null, terms: 'for a weekend' },
+      { item: 'Stewart Calculus textbook (8th ed.)', kind: 'sell', price: 40, floor: 30, terms: 'some highlighting' },
     ],
     skills: ['debugging Python'],
     courses: ['CSE 310'],
     availability: 'afternoons and late evenings',
     privateNotes: ["can't do anything before 10am"],
-    schedule: { hours: ['10:00', '24:00'], busy: [
+    schedule: { hours: ['10:00', '24:00'], free: [
+      { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], start: '11:00', end: '24:00' },
+      { days: ['Sat', 'Sun'], start: '12:00', end: '24:00' },
+    ], busy: [
       { days: ['Mon', 'Wed', 'Fri'], start: '10:00', end: '11:00', label: 'CSE 310 lecture', hard: true },
       { days: ['Tue', 'Thu'], start: '18:00', end: '21:00', label: 'library shift', hard: true },
     ] },
   });
   save();
-}
-
-/** What other agents are allowed to see about a student. Private notes never leave. */
-export function publicProfile(s) {
-  return {
-    name: s.name,
-    dorm: s.dorm,
-    offers: s.offers,
-    skills: s.skills,
-    needs: s.needs,
-    courses: s.courses || [],
-    availability: s.availability,
-  };
 }
 
 export function newDeal(data) {

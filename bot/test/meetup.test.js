@@ -54,3 +54,14 @@ test('no overlap gives no slots', () => {
   const late = { schedule: { hours: ['20:00', '23:00'], busy: [] } };
   assert.deepEqual(overlaps([freeWindows(early), freeWindows(late)], 60), []);
 });
+
+test('saved usual free times are the base, minus commitments', () => {
+  const s = { schedule: { hours: ['09:00', '23:00'],
+    free: [{ days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], start: '18:00', end: '24:00' }],
+    busy: [{ days: ['Mon'], start: '19:00', end: '20:00', label: 'gym', hard: false }] } };
+  assert.deepEqual(freeWindows(s).filter((w) => w.day === 'Mon'), [
+    { day: 'Mon', start: at(18), end: at(19) },
+    { day: 'Mon', start: at(20), end: at(24) },
+  ]);
+  assert.deepEqual(freeWindows(s).filter((w) => w.day === 'Sat'), []);
+});

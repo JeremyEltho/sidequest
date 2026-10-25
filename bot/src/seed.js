@@ -12,8 +12,8 @@ export const SEED_STUDENTS = [
     simulated: true,
     dorm: 'Hayden Hall, 3rd floor',
     offers: [
-      { item: 'broom and dustpan', terms: 'lend for free, back the same night' },
-      { item: 'clip-on desk lamp', terms: 'lend for a few days' },
+      { item: 'broom and dustpan', kind: 'lend', price: null, floor: null, terms: 'back the same night' },
+      { item: 'clip-on desk lamp', kind: 'lend', price: null, floor: null, terms: 'for a few days' },
     ],
     skills: ['proofreading essays'],
     needs: ['someone to look at a Python bug (pandas merge giving duplicate rows)'],
@@ -33,8 +33,8 @@ export const SEED_STUDENTS = [
     simulated: true,
     dorm: 'Hayden Hall, 2nd floor',
     offers: [
-      { item: 'tripod', terms: 'lend, must be back before 8am' },
-      { item: 'handheld vacuum', terms: 'lend for an hour' },
+      { item: 'tripod', kind: 'lend', price: null, floor: null, terms: 'must be back before 8am' },
+      { item: 'handheld vacuum', kind: 'lend', price: null, floor: null, terms: 'for an hour' },
     ],
     skills: ['photo editing'],
     needs: ['prints picked up from the library print shop'],
@@ -54,9 +54,9 @@ export const SEED_STUDENTS = [
     simulated: true,
     dorm: 'Hayden Hall, 1st floor',
     offers: [
-      { item: 'old broom', terms: 'sell for $8, moving out soon' },
-      { item: 'mini fridge (3.1 cu ft, works great)', terms: 'sell for $45, moving out soon' },
-      { item: 'pickups from the library or print shop', terms: 'only on the walk home around 4:40pm' },
+      { item: 'old broom', kind: 'sell', price: 8, floor: 6, terms: 'moving out soon' },
+      { item: 'mini fridge (3.1 cu ft, works great)', kind: 'sell', price: 45, floor: 35, terms: 'needs to be gone by Friday' },
+      { item: 'pickups from the library or print shop', kind: 'service', price: null, floor: null, terms: 'only on the walk home around 4:40pm' },
     ],
     skills: ['calc tutoring'],
     needs: ['USB-C laptop charger for an afternoon'],
@@ -68,7 +68,7 @@ export const SEED_STUDENTS = [
       { days: ['Fri'], start: '13:00', end: '17:00', label: 'work-study', hard: true },
       { days: ['Thu'], start: '18:00', end: '20:00', label: 'intramural soccer', hard: false },
     ] },
-    privateNotes: ['will go down to $6 on the broom if pushed', 'will take $35 for the fridge, nothing lower', 'needs the fridge gone by Friday'],
+    privateNotes: ['moving out at the end of the month'],
     color: 'D4A27F',
   },
 ];

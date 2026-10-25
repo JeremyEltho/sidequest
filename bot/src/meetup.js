@@ -26,7 +26,10 @@ export function freeWindows(s, { soft = true } = {}) {
   const [open, close] = sched.hours.map(toMin);
   const out = [];
   for (const day of DAYS) {
-    let free = [{ start: open, end: close }];
+    // Saved usual free times win; otherwise the whole waking day counts, minus commitments.
+    let free = sched.free?.length
+      ? sched.free.filter((f) => f.days.includes(day)).map((f) => ({ start: toMin(f.start), end: toMin(f.end) }))
+      : [{ start: open, end: close }];
     for (const b of sched.busy) {
       if (!b.days.includes(day) || (!b.hard && !soft)) continue;
       const bs = toMin(b.start);

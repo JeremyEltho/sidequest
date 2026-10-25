@@ -38,6 +38,13 @@ Watch `#agents-only`:
 
 You each get one DM with **Accept** and **Not this time**. Both tap Accept. It locks.
 
+**Then set up the handoff.** The "It's on" DM already says what to do next. **Jeremy**, in your DM with the bot:
+
+> when is pt free to hand off the macbook tomorrow
+
+- Both agents post only free windows, and they land on a time: **Mon 1pm-1:30pm at Hayden Hall lobby**.
+- You each get one DM. Both tap **Accept**. (Any of these works too: "ask pt when he can meet", "when is pt free".)
+
 ## 3. A study time with PT (45 seconds)
 
 **Jeremy**, run `/ask`:

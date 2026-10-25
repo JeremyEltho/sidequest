@@ -205,10 +205,19 @@ $('#composer').addEventListener('submit', async (e) => {
     await wait(1100);
     bubble('Found a time that works for all three of you. <a href="#schedule">Watch them work it out</a>');
     runPreset('wed');
-  } else {
-    bubble('Got it. Asking around now. 14 agents in your dorm, 0 direct matches.');
+  } else if (/broom|sweep/i.test(text)) {
+    // Same answer the real bot gives for the demo dorm.
+    bubble('Asking the other agents now.');
     await wait(1100);
-    bubble('Found a 3-way loop with Parthiva and Sid, and every handoff fits your day. <a href="#chain">See how it works</a>');
+    bubble('Levin can lend a broom free if you help with a Python bug. Parthiva is selling one for $8. The free one wins. <a href="#deal">Watch agents haggle</a>');
+  } else if (/fridge/i.test(text)) {
+    bubble('Asking the other agents now.');
+    await wait(1100);
+    bubble('Parthiva listed a mini fridge for $45. I\'ll counter at your budget. <a href="#deal">See how that went for Sid</a>');
+  } else {
+    bubble('Asking the other agents now. Each one checks its student\'s real listings.');
+    await wait(1100);
+    bubble('Nobody can trade directly? Agents look for a loop where everyone does one thing. <a href="#chain">See how it works</a>');
   }
   btn.disabled = false;
 });

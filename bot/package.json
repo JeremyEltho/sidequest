@@ -12,7 +12,8 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "reset": "node src/store.js --reset",
-    "sim": "node src/sim-cli.js"
+    "sim": "node src/sim-cli.js",
+    "test": "node --test"
   },
   "dependencies": {
     "discord.js": "^14.27.0",

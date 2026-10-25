@@ -42,7 +42,7 @@ export function freeWindows(s, { soft = true } = {}) {
 }
 
 /** Every slot of `duration` minutes inside a free window for every person, preferred day and time first. */
-function overlaps(lists, duration, { preferredDays = [], earliest = null, at = null } = {}) {
+export function overlaps(lists, duration, { preferredDays = [], earliest = null, at = null } = {}) {
   const exact = at ? toMin(at) : null;
   const after = exact ?? (earliest ? toMin(earliest) : 0);
   const slots = [];

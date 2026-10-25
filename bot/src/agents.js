@@ -293,6 +293,7 @@ export async function approve(deal, s, io) {
   }
   deal.status = 'live';
   save();
+  io.remind?.(deal);
   const owner = state.students.find((x) => x.id === deal.requesterId);
   await io.post(owner, `everyone's in. locked: ${deal.lines.join('; ')}`);
   for (const id of deal.participants) {

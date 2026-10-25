@@ -41,8 +41,37 @@ async function agentsHook() {
   return hook;
 }
 
+const DAY_INDEX = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+const REMIND_BEFORE_MIN = 30;
+
+/** Next time this weekday-and-minute comes around, as a Date. */
+function nextOccurrence(day, minute) {
+  const now = new Date();
+  const t = new Date(now);
+  t.setHours(0, 0, 0, 0);
+  t.setDate(t.getDate() + ((DAY_INDEX[day] - now.getDay() + 7) % 7));
+  t.setMinutes(minute);
+  if (t <= now) t.setDate(t.getDate() + 7);
+  return t;
+}
+
 // Everything the negotiation needs to talk to Discord.
 const io = {
+  // DM everyone in a locked study session shortly before it starts.
+  // Reminders live in memory, so they're lost if the bot restarts.
+  remind(deal) {
+    if (!deal.slot) return;
+    const start = nextOccurrence(deal.slot.day, deal.slot.start);
+    const wait = start - Date.now() - REMIND_BEFORE_MIN * 60_000;
+    if (wait < 0) return;
+    setTimeout(() => {
+      for (const id of deal.participants) {
+        const s = state.students.find((x) => x.id === id);
+        io.dmText(s, `⏰ ${deal.request?.topic ?? 'Your session'} starts in ${REMIND_BEFORE_MIN} minutes at ${deal.slot.place}.`).catch(() => {});
+      }
+    }, wait);
+    console.log(`Reminder set for deal ${deal.id}: ${start.toString()}`);
+  },
   async post(s, text) {
     if (!text) return;
     const h = await agentsHook();

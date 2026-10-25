@@ -156,6 +156,7 @@ export async function runMeetup(owner, meetup, io) {
 
   const place = meetup.place || 'Hayden Hall study room';
   const toDeal = (slot) => ({
+    slot: { ...slot, place },
     lines: [`${meetup.topic}: ${say(slot)} at ${place}`, `With: ${names(people)}`],
     summary: `Fits everyone's schedule${flexNote}. Agents only shared free windows; nobody's classes or plans left their own agent.`,
   });

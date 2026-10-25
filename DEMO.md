@@ -1,20 +1,21 @@
-# SideQuest demo script
+# SideQuest demo script (with PT)
 
-About 3 minutes. Two windows side by side: the Discord agents channel (`#agents-only`) on the laptop, and your DM with the bot on your phone.
+About 3 minutes. Two people, two phones. Jeremy runs the laptop (the `#agents-only` channel on screen). PT (Parthiva) has Discord open on his phone, because his agent is linked to his real account and he approves things himself.
 
 ## Before you start
 
-- The bot is running (`cd bot && npm start`), the laptop is plugged in and awake, and `npm run check` passes.
-- Run `/clear` so the agents channel starts empty, then `/demo` to reset your profile.
-- Best: a teammate (Levin or Parthiva) is next to you. Their agents are linked to their real accounts, so they tap **Accept** on their own phone.
+- Laptop plugged in and awake, Do Not Disturb on, the bot running (`cd bot && npm start`), and `npm run check` passing.
+- PT is next to you with Discord open on his phone.
+- Run `/clear` so the agents channel is empty, then `/reset`, then `/demo` so your profile is clean.
+- Everyone who gets a DM is a real person here. Don't run requests that include Levin unless Levin is also there.
 
 ## 1. The problem (10 seconds)
 
 "Asking five group chats for a mini fridge or a study time is awkward. Every student gets an agent that does it for them."
 
-## 2. List something in plain words (30 seconds)
+## 2. Sell something in plain words, buy it from PT's phone (60 seconds)
 
-In your DM with the bot, type:
+**Jeremy**, in your DM with the bot:
 
 > selling my macbook for $900, won't go below $700
 
@@ -23,47 +24,64 @@ The agent replies with a card:
 - **Listed:** macbook, sell $900
 - Your lowest price ($700) stays with the agent. Other agents only see $900.
 
-Then run `/market`. The MacBook shows at $900, and the $700 is nowhere.
+Run `/market`. The MacBook shows at $900, and the $700 is nowhere.
 
-## 3. A buyer shows up (45 seconds)
+**PT**, in his DM with the bot, on his phone:
 
-In `#agents-only`, run `/sim` and pick **listing: macbook**. (No typing: it's an autocomplete of your own listings.)
+> i want to buy a macbook, my budget is $750
 
-Point out, as it plays:
+Watch `#agents-only`:
 
-- Sid's agent shops for it with a $720 budget (80% of your asking price).
-- Your agent says $900. Sid's agent counters $720.
-- Your agent knew its private lowest price ($700), so it accepts. The buyer never saw the $700.
-- Everyone confirms, then the deal locks.
+- PT's agent asks for a macbook with a $750 budget.
+- Your agent says $900. PT's agent counters $750.
+- Your agent knew its private lowest price ($700), so it says "$750 works. deal."
 
-For the no-deal ending, run `/sim` with **scenario: MacBook $900, buyer has $750, my lowest $800**. Your agent says "best I can do is $825", and the buyer passes.
+You each get one DM with **Accept** and **Not this time**. Both tap Accept. It locks.
 
-## 4. Your agent finds a study time (45 seconds)
+## 3. A study time with PT (45 seconds)
 
-Run `/ask` and type: `2 hour CSE 310 study session wednesday night with sid`
+**Jeremy**, run `/ask`:
+
+> 2 hour CSE 310 study session wednesday night with parthiva
 
 - Each agent posts only its free windows. Nobody's classes or plans appear.
-- They land on Wed 9-11pm, and you get one DM with **Accept** and **Not this time**. Tap Accept.
+- They land on **Wed 6pm-8pm**. Both of you get one DM. Both tap **Accept**.
 
-## 5. A conflict (30 seconds)
+## 4. A conflict (30 seconds)
 
-Run `/ask`: `study wednesday at 7pm with sid`
+**Jeremy**, run `/ask`:
 
-- Sid has something fixed then. The agents never say what. They move to the closest time, Wed 9pm.
+> study monday at 4pm with parthiva
+
+- "Conflict": Parthiva has something fixed then. The agents never say what (it's a class).
+- They move to the closest time that works for both: **Mon 5:30pm-7pm**.
+
+Don't accept this one. The proposal just sits, which is fine.
+
+## 5. A plan that moves (30 seconds)
+
+**Jeremy**, run `/ask`:
+
+> study monday at 12pm with parthiva
+
+- Parthiva's gym slot is flexible, so his agent says "I can move something to make it work". It never says what.
+- PT gets a private heads-up DM. The time stays **Mon 12pm-1:30pm**.
+- Fixed things (a class) never move. Flexible things (the gym) can.
 
 ## 6. Privacy (15 seconds)
 
-Run `/profile` (only you see it), then `/share` (everything your agent told other agents).
+**Jeremy**: `/profile` (only you see it: your listings with your private lowest price and your commitments), then `/share` (everything your agent told other agents).
 
 ## What to say about Track 2
 
-- **Conflicting constraints:** fixed vs flexible schedule blocks, asking price vs budget vs private lowest price.
+- **Conflicting constraints:** asking price vs. budget vs. private lowest price, and fixed vs. flexible schedule blocks.
 - **What they share:** listings and free windows. Never schedules or lowest prices.
-- **When they confirm:** nothing happens until everyone taps Accept. A pass is never announced.
+- **When they confirm:** nothing happens until every person taps Accept. A pass is never announced.
 
 ## If something goes wrong
 
 - Nothing posts: check the bot's terminal, run `/clear`, and try again.
+- PT's phone is slow or he isn't there: run `/sim` (pick a scenario from the dropdown or `listing: macbook`). It needs no one else.
 - Discord shows old commands: Cmd+R.
 - Start over: `/reset`, then `/demo`.
 - Backup: the "Watch it work" section on the site, or the YouTube demo video.

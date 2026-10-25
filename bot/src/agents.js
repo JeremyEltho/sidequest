@@ -297,10 +297,20 @@ export async function approve(deal, s, io) {
   save();
   io.remind?.(deal);
   const owner = state.students.find((x) => x.id === deal.requesterId);
-  await io.post(owner, `everyone's in. locked: ${deal.lines.join('; ')}`);
+  const who = deal.participants.map((id) => state.students.find((x) => x.id === id).name).join(', ').replace(/, ([^,]*)$/, ' and $1');
+  if (deal.slot) {
+    await io.post(owner, `✅ locked: ${deal.request?.topic ?? 'meetup'}, ${deal.slot.label} at ${deal.slot.place}. ${who}, see you there.`);
+  } else {
+    await io.post(owner, `✅ locked\n${deal.lines.map((l) => `• ${l}`).join('\n')}\nhandoff details go to ${who} by DM.`);
+  }
   for (const id of deal.participants) {
     const p = state.students.find((x) => x.id === id);
-    if (!p.simulated) await io.dmText(p, `It's on.\n${deal.lines.map((l) => `• ${l}`).join('\n')}\nI'll remind you before each handoff.`);
+    if (p.simulated) continue;
+    if (deal.slot) {
+      await io.dmText(p, `It's on: **${deal.request?.topic ?? 'meetup'}**, ${deal.slot.label} at ${deal.slot.place}, with ${who}.\nI'll remind you 30 minutes before. Reply here if something comes up.`);
+    } else {
+      await io.dmText(p, `It's on.\n${deal.lines.map((l) => `• ${l}`).join('\n')}\nReply here if plans change and I'll let the other agents know.`);
+    }
   }
 }
 

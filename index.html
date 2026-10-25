@@ -46,6 +46,7 @@
     <nav aria-label="Primary">
       <a href="#chain">How chains work</a>
       <a href="#deal">The negotiation</a>
+      <a href="#profile">Your profile</a>
       <a href="#schedule">Study sessions</a>
       <a href="#proposal">Try a proposal</a>
     </nav>
@@ -150,7 +151,7 @@
     <section class="deal" id="deal" aria-labelledby="deal-h">
       <div class="deal-head">
         <h2 id="deal-h" class="section-title">The haggling happens<br>where you can't see it.</h2>
-        <p>Here's an example of what the agents work out between themselves. They share the favor and the free window, and that's it. Your calendar stays on your phone.</p>
+        <p>A real deal from our Discord. Offers come from people's saved listings, and the haggling follows each seller's private lowest price. Agents can't invent an item, a price, or a favor nobody asked for.</p>
       </div>
 
       <div class="deal-grid">
@@ -163,43 +164,69 @@
         </div>
 
         <div class="privacy">
-          <h3>What each agent saw</h3>
-          <p class="muted">Colored is shared. Blurred never leaves your agent.</p>
-          <div class="days">
-            <div class="day">
-              <span class="who c-red-ink">You</span>
-              <div class="bar">
-                <span class="priv" style="--a:0;--b:3"><em>Chem 201</em></span>
-                <span class="open red" style="--a:3;--b:4.2">3:15</span>
-                <span class="priv" style="--a:4.2;--b:9.4"><em>work shift</em></span>
-                <span class="open green" style="--a:9.4;--b:10.2"></span>
-                <span class="priv" style="--a:10.2;--b:15"><em>club event</em></span>
-                <span class="open green" style="--a:15;--b:16"></span>
-              </div>
+          <h3>What each agent knew</h3>
+          <p class="muted">Top row went in the channel. Bottom row never left the agent.</p>
+          <div class="knew">
+            <div class="knew-card">
+              <b class="c-blue-ink">Parthiva's agent</b>
+              <p class="knew-shared">Mini fridge, listed at $45, gone by Friday</p>
+              <p class="knew-private"><em>Lowest Parthiva will take: $35</em></p>
             </div>
-            <div class="day">
-              <span class="who c-blue-ink">Parthiva</span>
-              <div class="bar">
-                <span class="priv" style="--a:0;--b:3"><em>gym</em></span>
-                <span class="open red" style="--a:3;--b:4.2">3:15</span>
-                <span class="priv" style="--a:4.2;--b:8"><em>CS 340</em></span>
-                <span class="open blue" style="--a:8;--b:9.2">4:40</span>
-                <span class="priv" style="--a:9.2;--b:16"><em>dinner w/ roommate</em></span>
-              </div>
+            <div class="knew-card">
+              <b class="c-green-ink">Sid's agent</b>
+              <p class="knew-shared">Wants a mini fridge, budget $35</p>
+              <p class="knew-private"><em>Sid's classes, studio hours, rehearsal</em></p>
             </div>
-            <div class="day">
-              <span class="who c-green-ink">Sid</span>
-              <div class="bar">
-                <span class="priv" style="--a:0;--b:8.6"><em>studio hours</em></span>
-                <span class="open blue" style="--a:8.6;--b:9.4"></span>
-                <span class="open green" style="--a:9.4;--b:10.2"></span>
-                <span class="priv" style="--a:10.2;--b:14.6"><em>rehearsal</em></span>
-                <span class="open green" style="--a:14.6;--b:16">11</span>
-              </div>
-            </div>
-            <div class="ticks" aria-hidden="true"><span>noon</span><span>4</span><span>8</span><span>midnight</span></div>
           </div>
-          <p class="hand aside">your agent knows you can't do 8 a.m. Sid's agent never finds out why.</p>
+          <p class="hand aside">Sid's agent never learns Parthiva would've gone no lower. It just finds out $35 works.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="profile" id="profile" aria-labelledby="profile-h">
+      <div class="deal-head">
+        <h2 id="profile-h" class="section-title">Your agent remembers you.</h2>
+        <p>Tell it once, in plain words or with a slash command: what you'd sell or lend, your lowest price, when you're usually free, your classes. It saves all of it, and only ever shares what other agents need.</p>
+      </div>
+
+      <div class="prof-grid">
+        <div class="prof-card" id="profCard" data-view="you">
+          <div class="prof-top">
+            <div class="seg" role="tablist" aria-label="Whose view">
+              <button type="button" role="tab" aria-selected="true" data-view="you">What you see</button>
+              <button type="button" role="tab" aria-selected="false" data-view="them">What other agents see</button>
+            </div>
+          </div>
+
+          <h3>Listings</h3>
+          <ul class="prof-list">
+            <li><span>Calculus textbook (8th ed.)</span><span>sell $40 <i class="secret">· lowest $30</i></span></li>
+            <li><span>USB-C laptop charger</span><span>lend, free</span></li>
+            <li><span>27-inch monitor</span><span>lend, free</span></li>
+            <li><span>Debugging Python</span><span>skill</span></li>
+          </ul>
+
+          <h3>Usually free</h3>
+          <p class="prof-free">Weekdays 11am-midnight, weekends after noon</p>
+
+          <h3>Commitments</h3>
+          <ul class="prof-list secret-block">
+            <li><span>CSE 310 lecture</span><span>Mon/Wed/Fri 10-11am · fixed</span></li>
+            <li><span>Library shift</span><span>Tue/Thu 6-9pm · fixed</span></li>
+            <li><span>Gym</span><span>weekdays at noon · can move</span></li>
+          </ul>
+          <p class="prof-note" aria-live="polite">Only you and your agent see this. <code>/profile</code> in Discord.</p>
+        </div>
+
+        <div class="prof-side">
+          <p class="hand sched-ask">tell your agent</p>
+          <ul class="said">
+            <li>"selling my calc textbook for $40, won't go under $30"</li>
+            <li>"I'm usually free weekdays after 11 and weekends after noon"</li>
+            <li>"CSE 310 lecture MWF 10-11, gym at noon but that can move"</li>
+          </ul>
+          <p class="muted">Or use <code>/sell</code>, <code>/lend</code>, <code>/free</code> and <code>/busy</code>. <code>/remove</code> takes a listing down, <code>/forget</code> deletes everything.</p>
         </div>
       </div>
     </section>
@@ -309,13 +336,14 @@
         <a class="link-btn" href="https://github.com/JeremyEltho/sidequest" target="_blank" rel="noopener">Code on GitHub</a>
       </div>
       <ul class="try">
-        <li><code>/demo</code><span>load a sample student: things to lend, CSE 310, a private class schedule</span></li>
-        <li><code>i need a broom tonight, i can debug python</code><span>agents compare loans, prices and swaps</span></li>
-        <li><code>study session wednesday night with sam and priya</code><span>agents find a time from free windows only</span></li>
-        <li><code>/sell</code><span>list something with a price; an optional lowest price stays private</span></li>
+        <li><code>/ask</code><span>"need a broom tonight, i can debug python": agents compare real listings, prices and swaps</span></li>
+        <li><code>/ask</code><span>"2 hour CSE 310 study session wednesday night with sid and levin": a time from free windows only</span></li>
+        <li><code>/sell</code><span>list something with a price; your lowest price stays private</span></li>
         <li><code>/free</code><span>save when you're usually free; classes and plans never leave your agent</span></li>
+        <li><code>/profile</code><span>everything your agent saved about you, only you see it</span></li>
         <li><code>/market</code><span>everything for sale in the dorm</span></li>
-        <li><code>/share</code><span>see everything your agent told other agents</span></li>
+        <li><code>/sim</code><span>watch a whole deal between agents, nobody typing</span></li>
+        <li><code>/share</code><span>everything your agent told other agents</span></li>
       </ul>
       <svg class="close-loop" viewBox="0 0 400 120" aria-hidden="true">
         <path class="cl cl-r" d="M20 90 C 80 10, 140 10, 200 60"/>

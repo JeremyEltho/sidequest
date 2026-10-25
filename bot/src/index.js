@@ -5,7 +5,7 @@ import {
 } from 'discord.js';
 import { state, save, studentForUser, logShared } from './store.js';
 import { interpretDM, applyProfileUpdates, approve, decline } from './agents.js';
-import { runRequest } from './trade.js';
+import { runRequest, needsMax, counterDeal } from './trade.js';
 import { runMeetup } from './meetup.js';
 import { WELCOME, normalizeOffer, offerText, publicOffer } from './profile.js';
 import { COMMANDS, onCommand, onAutocomplete } from './commands.js';
@@ -149,17 +149,56 @@ client.once(Events.ClientReady, async (c) => {
 });
 
 /** Everything a student says to their agent in plain words, from a DM or /ask. */
+// People who asked for something that's for sale and haven't said their max yet: id -> the request.
+const awaitingMax = new Map();
+
+/** The deal (if any) that is waiting on this person's answer, so "can u try 800" can mean that deal. */
+function waitingDealFor(owner) {
+  return Object.values(state.deals)
+    .filter((d) => d.status === 'proposed' && d.price != null && d.approvals?.[owner.id] === 'pending')
+    .sort((a, b) => b.createdAt - a.createdAt)[0] || null;
+}
+
 async function handleText(owner, text, send) {
   if (busy.has(owner.id)) return send("Still working on your last ask, give me a sec.");
   busy.add(owner.id);
   try {
-    const r = await interpretDM(owner, text);
+    // Their agent asked "what's the most you'd pay?" and this is the answer.
+    const pending = awaitingMax.get(owner.id);
+    if (pending) {
+      awaitingMax.delete(owner.id);
+      const n = Number((text.match(/\$?\s*(\d[\d,]*(?:\.\d+)?)/) || [])[1]?.replace(/,/g, ''));
+      if (n > 0) {
+        await send(`Got it. I'll start lower and keep your max of $${n} to myself.`);
+        owner.needs = [...new Set([...owner.needs, pending.item])];
+        save();
+        await runRequest(owner, { ...pending, maxBudget: n }, io);
+        return;
+      }
+      // Not a number: treat it as a fresh message.
+    }
+    const waiting = waitingDealFor(owner);
+    const r = await interpretDM(owner, text, new Date(), waiting ? waiting.lines[0] : '');
+    if (r.intent === 'counter') {
+      if (!waiting) return send("There's no deal waiting on you right now. If you meant to change a listing price, say which item.");
+      await counterDeal(waiting, owner, Number(r.counter?.price), io, send);
+      return;
+    }
     // Asking for something never rewrites your week: only an "update" can change free times or commitments.
     // A request can still add what you offer in return ("I can debug Python").
     if (r.intent === 'request' || r.intent === 'meetup') {
       delete r.setFree; delete r.addBusy; delete r.clearBusy; delete r.removeOffers;
     }
     applyProfileUpdates(owner, r);
+    // Asking for something that's for sale, with no max given: ask for it first, privately.
+    if (r.intent === 'request' && r.request?.item) {
+      const ask = await needsMax(owner, r.request);
+      if (ask) {
+        awaitingMax.set(owner.id, r.request);
+        await send(`What's the most you'd pay for the ${ask.item}? The best listing is $${ask.asking}. I'll keep your max private and try to pay less.`);
+        return;
+      }
+    }
     if (r.reply) await send(r.reply);
     // Listing something in plain words: show exactly what was saved, and what everyone else will see.
     const listed = (r.addOffers || []).map(normalizeOffer).filter((o) => o && o.price != null);

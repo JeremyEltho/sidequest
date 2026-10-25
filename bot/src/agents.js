@@ -24,7 +24,7 @@ Refer to students by name or as they/them ("${s.name}'s free...", "they can...")
 }
 
 /** Work out what the owner wants from a DM. */
-export async function interpretDM(owner, text, now = new Date()) {
+export async function interpretDM(owner, text, now = new Date(), waitingDeal = '') {
   const day = (d) => d.toLocaleDateString('en-US', { weekday: 'long' });
   const tomorrow = new Date(now.getTime() + 24 * 3600 * 1000);
   const today = `${day(now)}, ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
@@ -32,10 +32,12 @@ export async function interpretDM(owner, text, now = new Date()) {
     `${agentSystem(owner)}
 
 Today is ${today}. "tomorrow" is ${day(tomorrow)}; "tonight" is ${day(now)} evening.
+${waitingDeal ? `A deal is waiting for ${owner.name}'s answer: ${waitingDeal}. If they ask you to try a different price ("can u try 800", "ask for 700", "make it 650"), that is a "counter" on this deal. It is NOT a change to their listing.` : ''}
 
 ${owner.name} just DMed you. Work out what they want.
-- "request": they need something (an item, a favor, help). "item" is just the thing ("speaker", "broom"), never a person's name or possessive: "parthiva's speaker" is item "speaker".
+- "request": they need something (an item, a favor, help). "item" is just the thing ("speaker", "broom"), never a person's name or possessive: "parthiva's speaker" is item "speaker". "maxBudget" is the most they said they would pay, or null if they gave no number; never guess one.
 - "meetup": they want to schedule something with other students: a study session, a group project meeting, planning a trip, or a meet-up to hand something off or pick it up. Asking "when is parthiva free to hand off the macbook" is a meetup: set topic to what it is for ("macbook handoff") and with to the person. Even a bare "when is pt free" is a meetup, with topic "meet up".
+- "counter": only when a deal is waiting (see above) and they want a different price on it.
 - "update": they're telling you what they can offer, their skills, needs, or schedule.
 - "status": they're asking what you know about them or what's going on.
 - "chat": anything else.
@@ -49,7 +51,8 @@ soft = habits and plans that could move. Never put a commitment in offers. Cours
 
 JSON shape:
 {
-  "intent": "request" | "meetup" | "update" | "status" | "chat",
+  "intent": "request" | "meetup" | "counter" | "update" | "status" | "chat",
+  "counter": { "price": number } | null,
   "request": { "item": string, "details": string, "neededBy": string, "returnBy": string | null, "maxBudget": number | null, "offering": string[] } | null,
   "meetup": { "topic": string, "with": string[], "course": string | null, "when": string, "durationMin": number, "preferredDays": string[], "earliest": "HH:MM" | null, "at": "HH:MM" | null, "place": string | null } | null,
   "addOffers": [{ "item": string, "kind": "sell" | "lend" | "rent" | "give" | "service", "price": number | null, "floor": number | null, "terms": string }],

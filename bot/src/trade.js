@@ -1,5 +1,5 @@
 import { askJSON } from './llm.js';
-import { state, byName } from './store.js';
+import { state, save, byName } from './store.js';
 import { propose, beat } from './agents.js';
 import { normalizeOffer } from './profile.js';
 
@@ -95,6 +95,36 @@ One short phrase, like "new ones are usually around $90-$120". Say it's an estim
   return r?.estimate || null;
 }
 
+/** Round a price to something a person would say: nearest $5 under $100, nearest $10 above. */
+const nice = (n) => (n < 100 ? Math.round(n / 5) * 5 : Math.round(n / 10) * 10);
+
+/**
+ * The haggle, as data. `max` is the buyer's private ceiling, `floor` the seller's private lowest price;
+ * neither is ever said out loud.
+ *   Normal: the buyer opens below its max (about 85%); the seller takes it if it clears their floor, otherwise
+ *   meets in the middle; if that is over the buyer's max the buyer makes one last offer at its max, which the
+ *   seller takes only if it clears their floor.
+ *   openAtMax (demo simulations): the buyer opens right at its max, one round, exactly as the scripted deals expect.
+ */
+export function planHaggle({ asking, floor, max, openAtMax = false }) {
+  floor = floor ?? asking;
+  if (openAtMax) {
+    if (asking <= max) return { price: asking, steps: [], deal: true };
+    if (max >= floor) return { price: max, steps: [{ by: 'buyer', ask: max }, { by: 'seller', accept: max }], deal: true };
+    const price = Math.max(floor, Math.ceil((asking + max) / 2));
+    return { price, steps: [{ by: 'buyer', ask: max }, { by: 'seller', counter: price }], deal: price <= max };
+  }
+  const open = Math.min(asking, nice(max * 0.85) || max);
+  if (open >= asking) return { price: asking, steps: [], deal: asking <= max };
+  const steps = [{ by: 'buyer', ask: open }];
+  if (open >= floor) return { price: open, steps: [...steps, { by: 'seller', accept: open }], deal: true };
+  const counter = Math.max(floor, Math.ceil((asking + open) / 2));
+  steps.push({ by: 'seller', counter });
+  if (counter <= max) return { price: counter, steps: [...steps, { by: 'buyer', accept: counter }], deal: true };
+  if (max >= floor) return { price: max, steps: [...steps, { by: 'buyer', last: max }, { by: 'seller', accept: max }], deal: true };
+  return { price: counter, steps, deal: false };
+}
+
 /**
  * One request, start to finish.
  * io.post(student, text) posts as that student's agent; io.dmText / io.dmProposal talk to real students.
@@ -118,7 +148,7 @@ export async function runRequest(owner, request, io, opts = {}) {
   request = { ...request, item: cleanItem(request.item, state.students.map((x) => x.name)) };
   const budget = request.maxBudget != null ? Number(request.maxBudget) : null;
   const offering = (request.offering || []).filter(Boolean);
-  await io.post(owner, `${owner.name} is looking for ${article(request.item)}${request.item}${request.neededBy ? ` ${request.neededBy}` : ''}${budget != null ? `, budget ${money(budget)}` : ''}${request.returnBy ? `, back by ${request.returnBy}` : ''}.${offering.length ? ` can offer ${offering.join(' or ')} in return.` : ''} anyone?`);
+  await io.post(owner, `${owner.name} is looking for ${article(request.item)}${request.item}${request.neededBy ? ` ${request.neededBy}` : ''}${budget != null && opts.simulation ? `, budget ${money(budget)}` : ''}${request.returnBy ? `, back by ${request.returnBy}` : ''}.${offering.length ? ` can offer ${offering.join(' or ')} in return.` : ''} anyone?`);
 
   // A simulation of one specific sale can pass in just that listing, so nothing else in the dorm competes with it.
   const matches = await matchListings(request, opts.onlyListings ?? dormListings(owner));
@@ -137,29 +167,30 @@ export async function runRequest(owner, request, io, opts = {}) {
 
   const best = openings[0];
   let price = best.price;
-  // Haggle once: counter at the budget; the seller takes it if it's at or above their private lowest,
-  // otherwise meets in the middle, never below that lowest.
-  if (price != null && budget != null && price > budget) {
-    await beat();
-    await io.post(owner, `${best.holder.name}, could you do ${money(budget)}?`);
-    const floor = best.offer.floor ?? price;
-    await beat();
-    if (budget >= floor) {
-      price = budget;
-      // A real seller hasn't agreed to anything yet: their agent can only say it's within what they'd take.
-      // They still get a DM to accept. A demo seller's agent can say it's a deal.
-      const needsOk = !opts.simulation && !best.holder.simulated;
-      await io.post(best.holder, needsOk ? `${money(budget)} could work for ${best.holder.name}. checking with them before anything is final.` : `${money(budget)} works. deal.`);
-    } else {
-      price = Math.max(floor, Math.ceil((best.price + budget) / 2));
-      await io.post(best.holder, price < best.price ? `best I can do is ${money(price)}.` : `sorry, ${money(price)} is firm.`);
+  const floor = best.offer.floor ?? price;
+  let plan = null;
+  if (price != null && budget != null) {
+    plan = planHaggle({ asking: price, floor: best.offer.floor, max: budget, openAtMax: !!opts.simulation });
+    // A real person hasn't agreed to anything yet: their agent can only say it could work. They still get a DM.
+    const sayDeal = (student, p) => (!opts.simulation && !student.simulated
+      ? `${money(p)} could work for ${student.name}. checking with them before anything is final.`
+      : `${money(p)} works. deal.`);
+    for (const st of plan.steps) {
+      await beat();
+      if (st.by === 'buyer' && st.ask != null) await io.post(owner, `${best.holder.name}, could you do ${money(st.ask)}?`);
+      else if (st.by === 'buyer' && st.last != null) await io.post(owner, `how about ${money(st.last)}?`);
+      else if (st.by === 'buyer') await io.post(owner, sayDeal(owner, st.accept));
+      else if (st.accept != null) await io.post(best.holder, sayDeal(best.holder, st.accept));
+      else await io.post(best.holder, st.counter < best.price ? `best I can do is ${money(st.counter)}.` : `sorry, ${money(st.counter)} is firm.`);
     }
+    price = plan.price;
   }
 
-  // In a simulation nobody is there to tap Accept, so the buyer's agent decides: it won't take a price over budget.
-  if (opts.simulation && price != null && budget != null && price > budget) {
+  // Nobody gets sent a price over the buyer's max. The buyer's agent passes and, for a real person, says so.
+  if (price != null && budget != null && price > budget) {
     await beat();
-    await io.post(owner, `${money(price)} is over ${owner.name}'s ${money(budget)} budget, so we'll pass. no deal.`);
+    await io.post(owner, `${money(price)} is more than ${owner.name} can do, so we'll pass. no deal.`);
+    if (!opts.simulation) await io.dmText(owner, `I couldn't get the ${request.item} within ${money(budget)}. If you'd go higher, just tell me a new max and I'll try again.`);
     return null;
   }
 
@@ -167,7 +198,8 @@ export async function runRequest(owner, request, io, opts = {}) {
   const why = (o, p) => {
     const parts = [];
     if (p == null) parts.push(o.wants ? `Free, for a favor you can do (${o.wants}).` : 'Free, nothing asked in return.');
-    else parts.push(budget != null ? `${money(p)}, ${p <= budget ? `within your ${money(budget)} budget` : `over your ${money(budget)} budget`}.` : `${money(p)}.`);
+    // A real buyer's max is private, and this summary is shown to the seller too, so only a demo mentions it.
+    else parts.push(budget != null && opts.simulation ? `${money(p)}, ${p <= budget ? `within your ${money(budget)} budget` : `over your ${money(budget)} budget`}.` : `${money(p)}.`);
     if (o === best && openings.length > 1) parts.push(`Best of ${openings.length} offers.`);
     return parts.join(' ');
   };
@@ -176,6 +208,7 @@ export async function runRequest(owner, request, io, opts = {}) {
     kind: 'direct',
     simulation: !!opts.simulation,
     participants: [owner.id, best.holder.id],
+    ...(price != null ? { price, sellerId: best.holder.id, buyerId: owner.id, limits: { floor, max: budget } } : {}),
     lines: [dealLine(best, owner, price)],
     summary: why(best, price),
     marketEstimate: estimate,
@@ -228,6 +261,64 @@ JSON shape: { "found": boolean, "steps": [{ "giver": string, "receiver": string,
     lines,
     summary: 'Nobody had a direct swap, so each person does one thing.',
     marketEstimate: null,
+    alternatives: [],
+  });
+}
+
+/**
+ * If someone asks for something that is only for sale and gave no max price, return what the best listing looks
+ * like so their agent can ask "what's the most you'd pay?". Free loans and favors don't need a price.
+ */
+export async function needsMax(owner, request) {
+  if (request.maxBudget != null) return null;
+  const item = cleanItem(request.item, state.students.map((x) => x.name));
+  const matches = await matchListings({ ...request, item }, dormListings(owner));
+  const priced = matches.map((l) => opening(l, owner, request)).filter((o) => o.price != null).sort((a, b) => cost(a) - cost(b));
+  const free = matches.map((l) => opening(l, owner, request)).some((o) => o.price == null);
+  if (free || !priced.length) return null;
+  return { item, asking: priced[0].price };
+}
+
+/**
+ * "Can u try 800": one side asks the other side's agent for a different price on a deal that's still waiting.
+ * The other agent answers from its owner's private limit (a buyer's max, a seller's lowest price) without ever
+ * saying what that limit is. If it clears, the old proposal is replaced by a new one both people still have to accept.
+ */
+export async function counterDeal(deal, proposer, newPrice, io, send) {
+  const byId = (id) => state.students.find((x) => x.id === id);
+  const seller = byId(deal.sellerId);
+  const buyer = byId(deal.buyerId);
+  if (deal.status !== 'proposed' || deal.price == null || !deal.limits || !seller || !buyer) {
+    return send("There's no deal with a price I can change right now.");
+  }
+  if (!Number.isFinite(newPrice) || newPrice <= 0) return send('Tell me the price you want me to try, like "try 800".');
+  if (newPrice === deal.price) return send(`It's already at ${money(newPrice)}.`);
+
+  const proposerIsSeller = proposer.id === seller.id;
+  const other = proposerIsSeller ? buyer : seller;
+  const item = deal.request?.item || 'it';
+  await send(`On it. Asking ${other.name}'s agent about ${money(newPrice)} for the ${item}.`);
+  await io.post(proposer, `${other.name}, could you do ${money(newPrice)}?`);
+  await beat();
+
+  // The seller moving down below their own floor is their choice; the buyer going above their max is not allowed.
+  const clears = proposerIsSeller ? newPrice <= deal.limits.max : newPrice >= deal.limits.floor;
+  if (!clears) {
+    await io.post(other, proposerIsSeller ? `sorry, ${money(newPrice)} is more than ${other.name} can do.` : `sorry, ${other.name} can't go that low.`);
+    return send(`${other.name}'s agent said no to ${money(newPrice)}. The ${money(deal.price)} proposal is still open.`);
+  }
+  await io.post(other, other.simulated ? `${money(newPrice)} works.` : `${money(newPrice)} could work for ${other.name}. checking with them before anything is final.`);
+
+  deal.status = 'superseded';
+  save();
+  const requester = byId(deal.requesterId) || buyer;
+  return propose(requester, deal.request, io, {
+    kind: 'direct',
+    participants: deal.participants,
+    price: newPrice, sellerId: deal.sellerId, buyerId: deal.buyerId, limits: deal.limits,
+    lines: [deal.lines[0].replace(/for \$[\d,]+/, `for ${money(newPrice)}`)],
+    summary: `New price: ${money(newPrice)} (it was ${money(deal.price)}). Both of you need to accept again.`,
+    marketEstimate: deal.marketEstimate ?? null,
     alternatives: [],
   });
 }

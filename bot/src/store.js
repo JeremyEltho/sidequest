@@ -33,11 +33,21 @@ export function reset() {
 /** The profile for a real Discord user, created the first time they DM the bot. */
 export function studentForUser(user) {
   let s = state.students.find((x) => x.discordId === user.id);
+  // A teammate from the demo roster takes over their agent the first time they show up.
+  const seeded = !s && state.students.find(
+    (x) => !x.discordId && x.discordUsername?.toLowerCase() === user.username?.toLowerCase(),
+  );
+  if (seeded) {
+    Object.assign(seeded, { discordId: user.id, simulated: false });
+    save();
+    return seeded;
+  }
   if (!s) {
+    const display = user.globalName || user.username;
     s = {
       id: `u${user.id}`,
       discordId: user.id,
-      name: user.globalName || user.username,
+      name: display.charAt(0).toUpperCase() + display.slice(1),
       simulated: false,
       dorm: 'Hayden Hall',
       offers: [],

@@ -48,7 +48,7 @@ JSON shape:
   "reply": string
 }
 "reply" is what you text ${owner.name} right now (for a request or meetup: say you're on it).
-For a meetup, preferredDays uses Mon..Sun, durationMin defaults to 90, earliest is set for words like "night" (18:00) or "afternoon" (12:00), and "at" is a specific start time if they gave one ("at 7pm" = "19:00").`,
+For a meetup, preferredDays uses Mon..Sun, durationMin defaults to 90, earliest is set for words like "night" (18:00) or "afternoon" (12:00), and "at" is set only when they typed a clock time ("at 7pm" = "19:00"); words like "night" or "evening" never set "at".`,
     text,
     { temperature: 0.3 },
   );

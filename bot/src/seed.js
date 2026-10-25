@@ -1,9 +1,14 @@
-// Demo dorm. These students are simulated: their agents answer on their behalf.
-// `privateNotes` stay with each student's own agent and are never sent to another agent.
+// The Sidequest Marketplace demo dorm: our team.
+// Each agent answers on its own until its teammate DMs the bot (matched by Discord username);
+// after that, that teammate approves their own deals.
+// `privateNotes` and `schedule` stay with each student's own agent and are never sent to another agent.
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+
 export const SEED_STUDENTS = [
   {
-    id: 'priya',
-    name: 'Priya',
+    id: 'levin',
+    name: 'Levin',
+    discordUsername: 'levvvv',
     simulated: true,
     dorm: 'Hayden Hall, 3rd floor',
     offers: [
@@ -18,31 +23,13 @@ export const SEED_STUDENTS = [
       { days: ['Tue', 'Thu'], start: '14:00', end: '17:00', label: 'Orgo lab', hard: true },
       { days: ['Mon'], start: '18:00', end: '20:00', label: 'team dinner', hard: false },
     ] },
-    privateNotes: ['Orgo lab Tue/Thu 2-5pm', 'team dinner Mon 6-8pm', 'likes studying in the evening, never after 11pm', 'would rather trade a favor than take money'],
+    privateNotes: ['likes studying in the evening, never after 11pm', 'would rather trade a favor than take money'],
     color: '788C5D',
   },
   {
-    id: 'alex',
-    name: 'Alex',
-    simulated: true,
-    dorm: 'Hayden Hall, 1st floor',
-    offers: [
-      { item: 'old broom', terms: 'sell for $8, moving out soon' },
-      { item: 'mini fridge', terms: 'sell for $45' },
-    ],
-    skills: ['bike repair'],
-    needs: ['tripod for a film class shoot'],
-    availability: 'around 12-2pm and after 9pm',
-    courses: ['FMS 200'],
-    schedule: { hours: ['10:00', '24:00'], busy: [
-      { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], start: '16:00', end: '21:00', label: 'dining hall shift', hard: true },
-    ] },
-    privateNotes: ['works at the dining hall 4-9pm', 'will go down to $6 on the broom if pushed', 'really wants a tripod this week'],
-    color: '6A9BCC',
-  },
-  {
-    id: 'sam',
-    name: 'Sam',
+    id: 'sid',
+    name: 'Sid',
+    discordUsername: 's30.z',
     simulated: true,
     dorm: 'Hayden Hall, 2nd floor',
     offers: [
@@ -54,49 +41,33 @@ export const SEED_STUDENTS = [
     availability: 'free 5-6pm and after 10pm',
     courses: ['CSE 310', 'ART 112'],
     schedule: { hours: ['08:00', '24:00'], busy: [
-      { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], start: '08:00', end: '16:00', label: '8am class, then studio hours', hard: true },
+      { days: WEEKDAYS, start: '08:00', end: '16:00', label: '8am class, then studio hours', hard: true },
       { days: ['Wed'], start: '19:00', end: '21:00', label: 'rehearsal', hard: true },
     ] },
-    privateNotes: ['8am class every weekday', 'studio hours 9am-4pm weekdays', 'rehearsal Wed 7-9pm', 'asleep by midnight'],
-    color: 'C46686',
+    privateNotes: ['8am class every weekday', 'asleep by midnight'],
+    color: '6A9BCC',
   },
   {
-    id: 'jordan',
-    name: 'Jordan',
+    id: 'parthiva',
+    name: 'Parthiva',
+    discordUsername: 'pt',
     simulated: true,
-    dorm: 'Hayden Hall, 2nd floor',
-    offers: [{ item: 'pickups from the library or print shop', terms: 'only on the walk home around 4:40pm' }],
+    dorm: 'Hayden Hall, 1st floor',
+    offers: [
+      { item: 'old broom', terms: 'sell for $8, moving out soon' },
+      { item: 'pickups from the library or print shop', terms: 'only on the walk home around 4:40pm' },
+    ],
     skills: ['calc tutoring'],
     needs: ['USB-C laptop charger for an afternoon'],
     availability: 'free 3-3:30pm and after 5pm',
     courses: ['CSE 310', 'MAT 343'],
     schedule: { hours: ['08:00', '23:30'], busy: [
       { days: ['Mon', 'Wed'], start: '15:30', end: '16:45', label: 'CS 340', hard: true },
-      { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], start: '12:00', end: '13:00', label: 'gym', hard: false },
+      { days: WEEKDAYS, start: '12:00', end: '13:00', label: 'gym', hard: false },
       { days: ['Fri'], start: '13:00', end: '17:00', label: 'work-study', hard: true },
       { days: ['Thu'], start: '18:00', end: '20:00', label: 'intramural soccer', hard: false },
     ] },
-    privateNotes: ['CS 340 Mon/Wed 3:30-4:45pm', 'gym at noon', 'work-study Fri 1-5pm', 'Thursday evenings are for intramural soccer 6-8pm'],
+    privateNotes: ['will go down to $6 on the broom if pushed'],
     color: 'D4A27F',
-  },
-  {
-    id: 'maya',
-    name: 'Maya',
-    simulated: true,
-    dorm: 'Hayden Hall, 4th floor',
-    offers: [
-      { item: 'Swiffer sweeper', terms: 'rent for $2, or swap for a small favor' },
-      { item: 'spare HDMI cable', terms: 'lend' },
-    ],
-    skills: ['resume reviews'],
-    needs: ['someone to return two library books'],
-    availability: 'evenings',
-    courses: ['ENG 101'],
-    schedule: { hours: ['10:00', '23:00'], busy: [
-      { days: ['Thu'], start: '09:00', end: '12:00', label: 'midterm', hard: true },
-      { days: ['Wed'], start: '18:00', end: '23:00', label: 'studying for the midterm', hard: false },
-    ] },
-    privateNotes: ['has a midterm Thursday', 'is fine giving the Swiffer for free to someone on her floor'],
-    color: 'CC785C',
   },
 ];

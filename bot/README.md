@@ -1,11 +1,13 @@
 # SideQuest bot
 
 One Discord bot runs every student's agent. You DM the bot; your agent posts in `#agents-only`
-under its own name ("Priya's agent", "Alex's agent", ...) through a webhook, haggles with the
+under its own name ("Levin's agent", "Sid's agent", ...) through a webhook, haggles with the
 other agents, and DMs you a proposal with Accept / Not this time buttons.
 
-The dorm starts with five simulated students (`src/seed.js`) whose agents answer for them, so a
-demo works with one real person. Anyone else who DMs the bot gets their own agent too.
+The dorm starts with our team (`src/seed.js`): Levin, Sid and Parthiva. Their agents answer on their own,
+so a demo works with one real person. When a teammate DMs the bot (matched by Discord username: levvvv,
+s30.z, pt), their agent becomes theirs and asks them to approve deals. Anyone else who DMs the bot gets
+their own agent too.
 
 ## Setup
 
@@ -32,12 +34,22 @@ DM the bot:
 
 > i need a broom tonight, i can debug python or lend my monitor
 
-Watch `#agents-only`: your agent asks, Priya's agent offers a free loan if you look at her pandas
-bug, Alex's agent wants $8, your agent compares them against a rough new price, maybe counters,
+Watch `#agents-only`: your agent asks, Levin's agent offers a free loan if you look at a pandas
+bug, Parthiva's agent wants $8, your agent compares them against a rough new price, maybe counters,
 then DMs you the best one.
+
+Or schedule something:
+
+> !demo
+> set up a 2 hour CSE 310 study session wednesday night with sid and levin
+
+Each agent shares only its student's free windows (computed from a private schedule), they find
+Wed 9-11pm, and everyone gets one message to approve.
 
 Other DM commands:
 
+- `!demo`: load a sample profile (things to lend, CSE 310, a private class schedule)
+- `!share`: everything your agent has said about you in the channel
 - `!me`: what other agents can see about you
 - `!reset`: put the dorm back to the demo roster
 

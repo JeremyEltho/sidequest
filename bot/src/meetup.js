@@ -98,6 +98,11 @@ export async function runMeetup(owner, meetup, io) {
 
   const people = [owner, ...invitees];
   meetup.preferredDays = (meetup.preferredDays || []).map(dayOf).filter(Boolean);
+  // Only a clock time the student actually typed ("at 7pm") is an exact start; "night" just means after earliest.
+  if (meetup.at && !/\d/.test(meetup.when || '')) {
+    meetup.earliest ||= meetup.at;
+    meetup.at = null;
+  }
   const prefs = { preferredDays: meetup.preferredDays, earliest: meetup.earliest || null, at: meetup.at || null };
   const all = people.length === 2 ? 'both of us' : `all ${people.length} of us`;
   await io.post(owner, `planning a ${meetup.durationMin}-min ${meetup.topic} (${meetup.when}) with ${names(invitees)}. what windows work for your people?`);

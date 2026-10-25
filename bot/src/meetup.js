@@ -92,6 +92,8 @@ export function typedClock(text) {
 }
 
 export async function runMeetup(owner, meetup, io, text = '') {
+  // The model sometimes writes times as 24-hour ("at 19:00"); the channel should read like a person ("at 7pm").
+  meetup.when = String(meetup.when || '').replace(/\b([01]?\d|2[0-3]):([0-5]\d)\b/g, (_, h, m) => clock(Number(h) * 60 + Number(m)));
   meetup.durationMin = Math.max(30, Number(meetup.durationMin) || 90);
   const named = (meetup.with || []).map(byName).filter((s) => s && s.id !== owner.id);
   // Named people win; a course only picks invitees when nobody was named.

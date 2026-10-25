@@ -52,8 +52,10 @@ export function forget(s) {
 export function studentForUser(user) {
   let s = state.students.find((x) => x.discordId === user.id);
   // A teammate from the demo roster takes over their agent the first time they show up.
+  // Matched by username or display name, since people often only know a teammate's display name.
+  const handles = [user.username, user.globalName].filter(Boolean).map((h) => h.toLowerCase());
   const seeded = !s && state.students.find(
-    (x) => !x.discordId && x.discordUsername?.toLowerCase() === user.username?.toLowerCase(),
+    (x) => !x.discordId && handles.includes(x.discordUsername?.toLowerCase()),
   );
   if (seeded) {
     Object.assign(seeded, { discordId: user.id, simulated: false });

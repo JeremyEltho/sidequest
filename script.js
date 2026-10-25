@@ -164,7 +164,7 @@ const examples = [
   'I need a tripod tonight. I can lend my monitor or debug Python.',
   'Need someone to grab my laundry card. Can lend an HDMI cable.',
   'Anyone have a calculator for tomorrow? I can proofread essays.',
-  'Find a time this week to study for CSE 310 with Sam and Priya.',
+  'Find a time this week to study for CSE 310 with Sid and Levin.',
 ];
 if (!reduced) {
   (async function cycle() {
@@ -201,14 +201,14 @@ $('#composer').addEventListener('submit', async (e) => {
   await wait(1300);
   t.remove();
   if (/study|session|meet|schedule|plan|free/i.test(text)) {
-    bubble('On it. Asking Sam and Priya\'s agents for free windows. Nobody\'s calendar gets shared.');
+    bubble('On it. Asking Sid and Levin\'s agents for free windows. Nobody\'s calendar gets shared.');
     await wait(1100);
     bubble('Found a time that works for all three of you. <a href="#schedule">Watch them work it out</a>');
     runPreset('wed');
   } else {
     bubble('Got it. Asking around now. 14 agents in your dorm, 0 direct matches.');
     await wait(1100);
-    bubble('Found a 3-way loop with Jordan and Sam, and every handoff fits your day. <a href="#chain">See how it works</a>');
+    bubble('Found a 3-way loop with Parthiva and Sid, and every handoff fits your day. <a href="#chain">See how it works</a>');
   }
   btn.disabled = false;
 });
@@ -236,17 +236,17 @@ once($('.close-loop'), () => $('.close-loop').classList.add('on'));
 
 /* ---------- negotiation log ---------- */
 const AGENTS = {
-  sam: { n: "Sam's agent", c: 'var(--green-ink)', a: 'S' },
+  sam: { n: "Sid's agent", c: 'var(--green-ink)', a: 'S' },
   you: { n: 'Your agent', c: 'var(--red-ink)', a: 'Y' },
-  jordan: { n: "Jordan's agent", c: 'var(--blue-ink)', a: 'J' },
+  jordan: { n: "Parthiva's agent", c: 'var(--blue-ink)', a: 'P' },
 };
 const SCRIPT = [
-  ['sam', 'Sam can lend a tripod tonight. One condition: it has to be back before Sam\'s 8 a.m. class.', '4:02'],
+  ['sam', 'Sid can lend a tripod tonight. One condition: it has to be back before Sid\'s 8 a.m. class.', '4:02'],
   ['you', 'Mine can\'t do an early morning handoff. Can it come back tonight instead, by 11 p.m. at Hayden lobby?', '4:02', 'counter'],
   ['sam', 'Back tonight is even better. Agreed.', '4:03'],
-  ['jordan', 'Jordan will do a pickup, but only on the walk home. The print shop at 4:40 works. A detour doesn\'t.', '4:03'],
+  ['jordan', 'Parthiva will do a pickup, but only on the walk home. The print shop at 4:40 works. A detour doesn\'t.', '4:03'],
   ['you', 'My person can drop the charger at the library steps at 3:15 and needs it back by 6.', '4:04'],
-  ['jordan', '3:15 to 6:00 works. Prints go to Sam\'s door, 4:55.', '4:04'],
+  ['jordan', '3:15 to 6:00 works. Prints go to Sid\'s door, 4:55.', '4:04'],
   ['sys', 'Everything fits. Sending three proposals.'],
 ];
 const logList = $('#logList');
@@ -321,7 +321,7 @@ $('#accept').addEventListener('click', async () => {
     dm.dataset.state = 'live';
     $('.stamp').textContent = 'deal on';
     $('.stamp').classList.add('alt');
-    $('#doneText').textContent = 'Done. Priya meets you at 6:00. Bring your laptop.';
+    $('#doneText').textContent = 'Done. Levin meets you at 6:00. Bring your laptop.';
     $('#dmDone').hidden = false;
   }
 });
@@ -336,7 +336,7 @@ $('#decline').addEventListener('click', async () => {
   await wait(1700);
   $('.msg-b').hidden = true;
   $('.msg-c').hidden = false;
-  li('jordan').querySelector('b').textContent = 'Priya';
+  li('jordan').querySelector('b').textContent = 'Levin';
   li('jordan').querySelector('.ring').className = 'ring c-blue';
   setYes('jordan');
   li('sam').hidden = true;
@@ -354,7 +354,7 @@ $('#reset').addEventListener('click', () => {
   $('#dmDone').hidden = true;
   $('#dmActions').hidden = false;
   $('#decline').hidden = false;
-  li('jordan').querySelector('b').textContent = 'Jordan';
+  li('jordan').querySelector('b').textContent = 'Parthiva';
   li('sam').hidden = false;
   ['jordan', 'sam'].forEach((w) => setYes(w, 'thinking...', ''));
   setYes('you', 'waiting on you', '');
@@ -381,19 +381,19 @@ const PEOPLE = {
     { days: ['Mon', 'Wed', 'Fri'], start: '10:00', end: '11:00', label: 'CSE 310 lecture', hard: true },
     { days: ['Tue', 'Thu'], start: '18:00', end: '21:00', label: 'library shift', hard: true },
   ] },
-  sam: { name: 'Sam', c: 'var(--blue)', hours: ['08:00', '24:00'], busy: [
+  sam: { name: 'Sid', c: 'var(--blue)', hours: ['08:00', '24:00'], busy: [
     { days: DAYS, start: '08:00', end: '16:00', label: 'class, then studio', hard: true },
     { days: ['Wed'], start: '19:00', end: '21:00', label: 'rehearsal', hard: true },
   ] },
-  priya: { name: 'Priya', c: 'var(--green)', hours: ['09:00', '23:00'], busy: [
+  priya: { name: 'Levin', c: 'var(--green)', hours: ['09:00', '23:00'], busy: [
     { days: ['Tue', 'Thu'], start: '14:00', end: '17:00', label: 'Orgo lab', hard: true },
     { days: ['Mon'], start: '18:00', end: '20:00', label: 'team dinner', hard: false },
   ] },
 };
 const PRESETS = {
-  wed: { who: ['you', 'sam', 'priya'], dur: 120, day: 'Wed', earliest: '18:00', text: '2-hour CSE 310 session Wednesday night with Sam and Priya', when: 'Wednesday night' },
-  sam: { who: ['you', 'sam'], dur: 90, day: 'Wed', at: '19:00', text: 'study Wednesday at 7pm with Sam', when: 'Wednesday at 7pm' },
-  priya: { who: ['you', 'priya'], dur: 90, day: 'Mon', at: '18:00', text: 'study Monday at 6pm with Priya', when: 'Monday at 6pm' },
+  wed: { who: ['you', 'sam', 'priya'], dur: 120, day: 'Wed', earliest: '18:00', text: '2-hour CSE 310 session Wednesday night with Sid and Levin', when: 'Wednesday night' },
+  sam: { who: ['you', 'sam'], dur: 90, day: 'Wed', at: '19:00', text: 'study Wednesday at 7pm with Sid', when: 'Wednesday at 7pm' },
+  priya: { who: ['you', 'priya'], dur: 90, day: 'Mon', at: '18:00', text: 'study Monday at 6pm with Levin', when: 'Monday at 6pm' },
 };
 
 function freeWindows(p, soft = true) {

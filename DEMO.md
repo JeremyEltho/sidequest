@@ -28,15 +28,29 @@ Run `/market`. The MacBook shows at $900, and the $700 is nowhere.
 
 **PT**, in his DM with the bot, on his phone:
 
-> i want to buy a macbook, my budget is $750
+> i want to buy a macbook
 
-Watch `#agents-only`:
+His agent asks: **"What's the most you'd pay for the macbook?"** and promises to keep the answer private. PT replies:
 
-- PT's agent asks for a macbook with a $750 budget.
-- Your agent says $900. PT's agent counters $750.
-- Your agent knew its private lowest price ($700), so it says "$750 works. deal."
+> 800
 
-You each get one DM with **Accept** and **Not this time**. Both tap Accept. It locks.
+Watch `#agents-only`. PT's max never appears anywhere:
+
+- PT's agent asks for a macbook, and your agent says $900.
+- PT's agent opens **below** his max: "could you do $680?"
+- Your agent knew its private lowest price ($700), so it meets in the middle: "best I can do is $790."
+- PT's agent: "$790 could work for Parthiva. checking with them before anything is final."
+
+You each get a DM at **$790** with **Accept** and **Not this time**. Don't accept yet.
+
+**Jeremy**, in your DM, push for more:
+
+> can u try 800
+
+- Your agent asks PT's agent. $800 is within PT's private max, so it says yes. Neither of you is told the other's limit.
+- You each get a **new** DM at **$800**, and the $790 one stops working. Both tap **Accept**. It locks.
+
+For the other ending, say **"ok try 850 then"** instead: "sorry, $850 is more than Parthiva can do", and the $800 proposal stays open.
 
 **Then set up the handoff.** The "It's on" DM already says what to do next. **Jeremy**, in your DM with the bot:
 
@@ -81,7 +95,7 @@ Don't accept this one. The proposal just sits, which is fine.
 
 ## What to say about Track 2
 
-- **Conflicting constraints:** asking price vs. budget vs. private lowest price, and fixed vs. flexible schedule blocks.
+- **Conflicting constraints:** asking price vs. the buyer's private max vs. the seller's private lowest price, and fixed vs. flexible schedule blocks.
 - **What they share:** listings and free windows. Never schedules or lowest prices.
 - **When they confirm:** nothing happens until every person taps Accept. A pass is never announced.
 

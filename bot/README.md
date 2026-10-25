@@ -63,6 +63,15 @@ Every student's agent keeps a profile in `data/state.json`, so it survives resta
 Set it by DMing your agent in plain words ("selling my desk lamp for $10, won't go under $7", "I'm free
 weekdays after 6"), or with the slash commands below.
 
+## Prices: private max, private lowest price
+
+A buyer's agent asks "what's the most you'd pay?" when you want something that's for sale and you didn't say. That
+max stays private (never posted, never shown to the seller). The agent opens about 15% under it, the seller's agent
+meets in the middle down to the seller's private lowest price, and one last offer at the max is allowed. Nothing is
+sent above the max. Once a proposal is waiting, either person can say "can u try 800": their agent asks the other
+agent, which answers from its owner's private limit. If it clears, a new proposal replaces the old one and both
+people accept again.
+
 ## Slash commands
 
 Work in the server and in DMs with the bot. Private ones only show to you.

@@ -1,7 +1,7 @@
 import { MessageFlags } from 'discord.js';
 import { state, save, studentForUser, reset, forget, demoProfile } from './store.js';
 import { applyProfileUpdates, describeProfile, marketText, removeOffer, normalizeOffer, offerText } from './profile.js';
-import { runSim } from './sim.js';
+import { runSim, SCENARIOS } from './sim.js';
 
 // Usable in the server and in DMs with the bot.
 const everywhere = { contexts: [0, 1], integration_types: [0] };
@@ -35,7 +35,8 @@ export const COMMANDS = [
   { name: 'market', description: 'Everything listed in the dorm' },
   { name: 'share', description: 'Everything your agent has said about you to other agents' },
   { name: 'demo', description: 'Load a sample profile with listings and a class schedule' },
-  { name: 'sim', description: 'Watch a deal play out. Add an item to simulate your own sale.', options: [
+  { name: 'sim', description: 'Watch a deal play out. Pick a ready-made one, or build your own sale.', options: [
+    { type: STRING, name: 'scenario', description: 'Pick a ready-made deal', choices: Object.entries(SCENARIOS).map(([value, sc]) => ({ name: sc.label.slice(0, 100), value })) },
     { type: STRING, name: 'item', description: 'What you are selling, e.g. macbook (leave empty for the default fridge deal)' },
     { type: NUMBER, name: 'price', description: 'Your asking price in dollars', min_value: 0 },
     { type: NUMBER, name: 'budget', description: "What the buyer (Sid's agent) can pay", min_value: 0 },
@@ -126,6 +127,11 @@ export async function onCommand(i, ctx) {
       return i.reply(priv(`Loaded a sample profile:\n\n${describeProfile(owner)}\n\nTry \`/ask\` "2 hour CSE 310 study session wednesday night with sid and levin".`));
 
     case 'sim': {
+      const scenario = SCENARIOS[opt('scenario')];
+      if (scenario) {
+        await i.reply(`Simulating: ${scenario.label} 👀`);
+        return runSim(ctx.io, { ...scenario, seller: owner }).catch((err) => console.error(err));
+      }
       const item = opt('item');
       if (item && (opt('price') == null || opt('budget') == null)) {
         return i.reply(priv('To simulate a sale I need the item, your asking price and the buyer\'s budget, like `/sim item:macbook price:900 budget:750`. Add `lowest` for your private floor.'));

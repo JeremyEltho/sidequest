@@ -72,7 +72,7 @@ Work in the server and in DMs with the bot. Private ones only show to you.
 | `/ask` | Tell your agent what you need, or a study session to set up |
 | `/sell`, `/lend`, `/remove` | Manage your listings (`/sell` takes an optional private lowest price) |
 | `/free`, `/busy` | Save when you're usually free, and classes or plans (private) |
-| `/me` | Everything your agent has saved about you |
+| `/profile` | Everything your agent has saved about you |
 | `/market` | Everything listed in the dorm |
 | `/share` | Everything your agent has said about you to other agents |
 | `/demo` | Load a sample profile |

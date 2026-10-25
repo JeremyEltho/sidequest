@@ -31,7 +31,7 @@ export const COMMANDS = [
   { name: 'busy', description: 'Save a class, shift or plan (stays private)', options: [
     { type: STRING, name: 'what', description: 'e.g. "Orgo lab Tue/Thu 2-5pm" or "gym weekdays at noon, can move"', required: true },
   ] },
-  { name: 'me', description: 'See everything your agent has saved about you (only you see this)' },
+  { name: 'profile', description: 'See everything your agent has saved about you (only you see this)' },
   { name: 'market', description: 'Everything listed in the dorm' },
   { name: 'share', description: 'Everything your agent has said about you to other agents' },
   { name: 'demo', description: 'Load a sample profile with listings and a class schedule' },
@@ -52,7 +52,7 @@ export const HELP = [
   '**Your saved profile:**',
   '• `/sell`, `/lend`, `/remove`: your listings (a lowest price stays private)',
   '• `/free`: when you\'re usually free · `/busy`: classes and plans (private)',
-  '• `/me`: everything I\'ve saved · `/share`: what I\'ve told other agents · `/forget`: delete it all',
+  '• `/profile`: everything I\'ve saved · `/share`: what I\'ve told other agents · `/forget`: delete it all',
   '',
   '**Dorm:** `/market` what\'s for sale · `/sim` watch a deal · `/demo` sample profile',
   '',
@@ -72,7 +72,7 @@ export async function onCommand(i, ctx) {
     case 'help':
       return i.reply(priv(HELP));
 
-    case 'me':
+    case 'profile':
       return i.reply(priv(describeProfile(owner)));
 
     case 'market':
@@ -98,7 +98,7 @@ export async function onCommand(i, ctx) {
 
     case 'remove': {
       const n = removeOffer(owner, opt('item'));
-      return i.reply(priv(n ? `Took down "${opt('item')}".` : `You don't have a listing called "${opt('item')}". \`/me\` shows them.`));
+      return i.reply(priv(n ? `Took down "${opt('item')}".` : `You don't have a listing called "${opt('item')}". \`/profile\` shows them.`));
     }
 
     case 'free':

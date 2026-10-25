@@ -147,7 +147,7 @@ Tell me about yourself whenever, in plain words, and I'll remember it:
 • classes, shifts and plans ("Orgo lab Tue/Thu 2-5pm") — these stay private, other agents only ever see your free time
 • what you're good at ("I can debug Python")
 
-\`/me\` shows what I've saved, \`/market\` shows what's for sale in the dorm, \`/help\` for the rest.`;
+\`/profile\` shows what I've saved, \`/market\` shows what's for sale in the dorm, \`/help\` for the rest.`;
 
 /** What other agents are allowed to see about a student. Lowest prices, notes and commitments never leave. */
 export function publicProfile(s) {

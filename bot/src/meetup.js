@@ -158,10 +158,12 @@ export async function runMeetup(owner, meetup, io) {
   }
 
   const place = meetup.place || 'Hayden Hall study room';
-  const toDeal = (slot) => ({
+  const toDeal = (slot, i = 0) => ({
     slot: { ...slot, place, label: say(slot) },
     lines: [`${meetup.topic}: ${say(slot)} at ${place}`, `With: ${names(people)}`],
-    summary: `Fits everyone's schedule${flexNote}. Agents only shared free windows; nobody's classes or plans left their own agent.`,
+    summary: i === 0
+      ? `Fits everyone's schedule${flexNote}. Agents only shared free windows; nobody's classes or plans left their own agent.`
+      : `Next best time that fits everyone's schedule (backup ${i} of ${Math.min(slots.length - 1, 3)}).`,
   });
 
   await beat();
@@ -171,6 +173,6 @@ export async function runMeetup(owner, meetup, io) {
     participants: people.map((p) => p.id),
     ...toDeal(slots[0]),
     marketEstimate: null,
-    alternatives: slots.slice(1, 4).map(toDeal),
+    alternatives: slots.slice(1, 4).map((slot, i) => toDeal(slot, i + 1)),
   });
 }

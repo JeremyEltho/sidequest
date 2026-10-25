@@ -50,7 +50,7 @@ and keeps 6pm, without saying what moved.
 
 ## 5. Privacy, in two commands (20 seconds)
 
-Run `/me` (only you see it): your listings with your private lowest price, your free times, your
+Run `/profile` (only you see it): your listings with your private lowest price, your free times, your
 commitments. Then `/share`:
 
 It lists every message your agent posted about you. Everything else (classes, limits, why you're busy)

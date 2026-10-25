@@ -100,7 +100,22 @@ One short phrase, like "new ones are usually around $90-$120". Say it's an estim
  * io.post(student, text) posts as that student's agent; io.dmText / io.dmProposal talk to real students.
  * opts.simulation: a demo deal, every agent confirms on its own and nobody gets DMs.
  */
+/**
+ * "parthivas speaker", "Parthiva's speaker" and "the speaker from Parthiva" all mean just "speaker":
+ * the model sometimes copies the seller's name into the item, and the channel should read naturally.
+ */
+export function cleanItem(item, names = []) {
+  let out = String(item || '').trim();
+  const alt = names.filter(Boolean).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  if (!alt) return out.replace(/^(?:the|an?|some|my)\s+/i, '') || out;
+  const lead = new RegExp(`^(?:the\\s+)?(?:${alt})(?:['’]s|s)?\\s+`, 'i');
+  const trail = new RegExp(`\\s+(?:from|by|of|at)\\s+(?:${alt})$`, 'i');
+  for (let i = 0; i < 3; i++) out = out.replace(lead, '').replace(trail, '').replace(/^(?:the|an?|some|my)\s+/i, '').trim();
+  return out || String(item).trim();
+}
+
 export async function runRequest(owner, request, io, opts = {}) {
+  request = { ...request, item: cleanItem(request.item, state.students.map((x) => x.name)) };
   const budget = request.maxBudget != null ? Number(request.maxBudget) : null;
   const offering = (request.offering || []).filter(Boolean);
   await io.post(owner, `${owner.name} is looking for ${article(request.item)}${request.item}${request.neededBy ? ` ${request.neededBy}` : ''}${budget != null ? `, budget ${money(budget)}` : ''}${request.returnBy ? `, back by ${request.returnBy}` : ''}.${offering.length ? ` can offer ${offering.join(' or ')} in return.` : ''} anyone?`);

@@ -29,7 +29,7 @@ export async function interpretDM(owner, text) {
     `${agentSystem(owner)}
 
 ${owner.name} just DMed you. Work out what they want.
-- "request": they need something (an item, a favor, help).
+- "request": they need something (an item, a favor, help). "item" is just the thing ("speaker", "broom"), never a person's name or possessive: "parthiva's speaker" is item "speaker".
 - "meetup": they want to schedule something with other students (a study session, a group project meeting, planning a trip).
 - "update": they're telling you what they can offer, their skills, needs, or schedule.
 - "status": they're asking what you know about them or what's going on.

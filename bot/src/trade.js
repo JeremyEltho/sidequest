@@ -105,7 +105,8 @@ export async function runRequest(owner, request, io, opts = {}) {
   const offering = (request.offering || []).filter(Boolean);
   await io.post(owner, `${owner.name} is looking for ${article(request.item)}${request.item}${request.neededBy ? ` ${request.neededBy}` : ''}${budget != null ? `, budget ${money(budget)}` : ''}${request.returnBy ? `, back by ${request.returnBy}` : ''}.${offering.length ? ` can offer ${offering.join(' or ')} in return.` : ''} anyone?`);
 
-  const matches = await matchListings(request, dormListings(owner));
+  // A simulation of one specific sale can pass in just that listing, so nothing else in the dorm competes with it.
+  const matches = await matchListings(request, opts.onlyListings ?? dormListings(owner));
   if (!matches.length) return tryChain(owner, request, io, opts);
 
   // One opening per student (their best listing for this), posted from the real listing.
@@ -137,7 +138,14 @@ export async function runRequest(owner, request, io, opts = {}) {
     }
   }
 
-  const estimate = best.price != null ? await priceCheck(best.offer.item) : null;
+  // In a simulation nobody is there to tap Accept, so the buyer's agent decides: it won't take a price over budget.
+  if (opts.simulation && price != null && budget != null && price > budget) {
+    await beat();
+    await io.post(owner, `${money(price)} is over ${owner.name}'s ${money(budget)} budget, so we'll pass. no deal.`);
+    return null;
+  }
+
+  const estimate = best.price != null && !opts.simulation ? await priceCheck(best.offer.item) : null;
   const why = (o, p) => {
     const parts = [];
     if (p == null) parts.push(o.wants ? `Free, for a favor you can do (${o.wants}).` : 'Free, nothing asked in return.');

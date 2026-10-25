@@ -35,7 +35,12 @@ export const COMMANDS = [
   { name: 'market', description: 'Everything listed in the dorm' },
   { name: 'share', description: 'Everything your agent has said about you to other agents' },
   { name: 'demo', description: 'Load a sample profile with listings and a class schedule' },
-  { name: 'sim', description: 'Watch a whole marketplace deal between demo students' },
+  { name: 'sim', description: 'Watch a deal play out. Add an item to simulate your own sale.', options: [
+    { type: STRING, name: 'item', description: 'What you are selling, e.g. macbook (leave empty for the default fridge deal)' },
+    { type: NUMBER, name: 'price', description: 'Your asking price in dollars', min_value: 0 },
+    { type: NUMBER, name: 'budget', description: "What the buyer (Sid's agent) can pay", min_value: 0 },
+    { type: NUMBER, name: 'lowest', description: 'Your private lowest price (the buyer never sees it)', min_value: 0 },
+  ] },
   { name: 'clear', description: 'Delete the agents\' messages from the agents channel' },
   { name: 'reset', description: 'Reset the demo students and deals (your profile stays)' },
   { name: 'forget', description: 'Delete everything your agent has saved about you' },
@@ -54,7 +59,7 @@ export const HELP = [
   '• `/free`: when you\'re usually free · `/busy`: classes and plans (private)',
   '• `/profile`: everything I\'ve saved · `/share`: what I\'ve told other agents · `/forget`: delete it all',
   '',
-  '**Dorm:** `/market` what\'s for sale · `/sim` watch a deal · `/demo` sample profile',
+  '**Dorm:** `/market` what\'s for sale · `/sim` watch a deal (add item, price and budget to simulate your own sale) · `/demo` sample profile',
   '',
   'Nothing happens until everyone taps Accept.',
 ].join('\n');
@@ -120,9 +125,15 @@ export async function onCommand(i, ctx) {
       demoProfile(owner);
       return i.reply(priv(`Loaded a sample profile:\n\n${describeProfile(owner)}\n\nTry \`/ask\` "2 hour CSE 310 study session wednesday night with sid and levin".`));
 
-    case 'sim':
-      await i.reply('Running a marketplace deal in the agents channel 👀');
-      return runSim(ctx.io).catch((err) => console.error(err));
+    case 'sim': {
+      const item = opt('item');
+      if (item && (opt('price') == null || opt('budget') == null)) {
+        return i.reply(priv('To simulate a sale I need the item, your asking price and the buyer\'s budget, like `/sim item:macbook price:900 budget:750`. Add `lowest` for your private floor.'));
+      }
+      await i.reply(item ? `Simulating ${owner.name}'s ${item} sale in the agents channel 👀` : 'Running a marketplace deal in the agents channel 👀');
+      const input = item ? { item, price: opt('price'), budget: opt('budget'), lowest: opt('lowest'), seller: owner } : undefined;
+      return runSim(ctx.io, input).catch((err) => console.error(err));
+    }
 
     case 'clear': {
       await i.deferReply({ flags: MessageFlags.Ephemeral });

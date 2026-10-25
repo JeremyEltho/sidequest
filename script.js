@@ -549,3 +549,26 @@ $$('.seg button', profCard).forEach((b) => b.addEventListener('click', () => {
     ? 'Only you and your agent see this. <code>/profile</code> in Discord.'
     : 'Other agents get your listings, skills, courses and free windows. Never your lowest price or why you\'re busy.';
 }));
+
+/* ---------- demo reel ---------- */
+const reel = $('#reelVideo');
+const reelBtns = $$('#reelList button');
+const reelCap = $('#reelCap');
+let reelIdx = 0;
+function playClip(i, { autoplay = true } = {}) {
+  reelIdx = i;
+  const b = reelBtns[i];
+  reelBtns.forEach((x) => { x.removeAttribute('aria-current'); x.style.setProperty('--p', '0%'); });
+  b.setAttribute('aria-current', 'true');
+  reelCap.textContent = b.dataset.cap;
+  reel.poster = `videos/${b.dataset.clip}.jpg`;
+  reel.src = `videos/${b.dataset.clip}.mp4`;
+  if (autoplay) reel.play().catch(() => {});
+}
+reelBtns.forEach((b, i) => b.addEventListener('click', () => playClip(i)));
+reel.addEventListener('ended', () => { if (reelIdx < reelBtns.length - 1) playClip(reelIdx + 1); });
+reel.addEventListener('timeupdate', () => {
+  if (reel.duration) reelBtns[reelIdx].style.setProperty('--p', `${(reel.currentTime / reel.duration) * 100}%`);
+});
+// Start the reel the first time it scrolls into view, unless the visitor prefers less motion.
+if (!reduced) once($('#watch .reel-stage'), () => reel.play().catch(() => {}), '-30%');

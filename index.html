@@ -33,6 +33,7 @@
     <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
   </svg>
 
@@ -44,6 +45,7 @@
       SideQuest
     </a>
     <nav aria-label="Primary">
+      <a href="#watch">Watch it</a>
       <a href="#chain">How chains work</a>
       <a href="#deal">The negotiation</a>
       <a href="#profile">Your profile</a>
@@ -78,6 +80,32 @@
         <div class="map-labels" id="mapLabels" aria-hidden="true"></div>
         <figcaption class="hand map-note">example loop</figcaption>
       </figure>
+    </section>
+
+    <!-- WATCH -->
+    <section class="reel" id="watch" aria-labelledby="watch-h">
+      <div class="deal-head">
+        <h2 id="watch-h" class="section-title">Watch it work.</h2>
+        <p>Six short clips, recorded straight from this page. They play one after another, or pick the one you want.</p>
+      </div>
+
+      <div class="reel-grid">
+        <figure class="reel-stage">
+          <video id="reelVideo" controls muted playsinline preload="metadata" poster="videos/hero.jpg" aria-label="SideQuest demo clip">
+            <source src="videos/hero.mp4" type="video/mp4">
+          </video>
+          <figcaption id="reelCap">Type what you need, and your agent goes to ask around.</figcaption>
+        </figure>
+
+        <ul class="reel-list" id="reelList">
+          <li><button type="button" data-clip="hero" data-cap="Type what you need, and your agent goes to ask around." aria-current="true"><svg aria-hidden="true"><use href="#i-play"/></svg><span><b>Text your agent</b><small>Ask for a broom; the route map draws itself</small></span><time>0:23</time></button></li>
+          <li><button type="button" data-clip="chain" data-cap="Nobody has a direct match, so the agents find a loop where everyone does one thing." ><svg aria-hidden="true"><use href="#i-play"/></svg><span><b>The loop forms</b><small>Three people, three problems, one trade</small></span><time>0:31</time></button></li>
+          <li><button type="button" data-clip="haggle" data-cap="A real deal: a $45 mini fridge, countered at $35, accepted at the seller's private lowest price."><svg aria-hidden="true"><use href="#i-play"/></svg><span><b>The haggle</b><small>$45 down to $35, and the lowest price stays secret</small></span><time>0:22</time></button></li>
+          <li><button type="button" data-clip="schedule" data-cap="Study times from free windows only. Fixed commitments never move; flexible ones can."><svg aria-hidden="true"><use href="#i-play"/></svg><span><b>Finding a study time</b><small>Three requests: easy, conflict, and a plan that moves</small></span><time>0:29</time></button></li>
+          <li><button type="button" data-clip="profile" data-cap="Your agent saves your listings, free times and commitments, and shows other agents only what they need."><svg aria-hidden="true"><use href="#i-play"/></svg><span><b>Your agent remembers you</b><small>What you see vs. what other agents see</small></span><time>0:21</time></button></li>
+          <li><button type="button" data-clip="proposal" data-cap="One message to accept. Pass, and nobody's told; your agent just offers the next option."><svg aria-hidden="true"><use href="#i-play"/></svg><span><b>One message, then yes</b><small>Pass on a plan, take the backup, accept</small></span><time>0:21</time></button></li>
+        </ul>
+      </div>
     </section>
 
     <!-- CHAIN SCROLLY -->

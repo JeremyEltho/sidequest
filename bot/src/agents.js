@@ -2,9 +2,9 @@ import { askJSON } from './llm.js';
 import { state, save, publicProfile, byName, newDeal } from './store.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const beat = () => sleep(900 + Math.random() * 1400);
+export const beat = () => sleep(900 + Math.random() * 1400);
 
-function agentSystem(s) {
+export function agentSystem(s) {
   return `You are ${s.name}'s personal agent in SideQuest, a favor-trading network for one college dorm (${s.dorm}).
 You negotiate with other students' agents in a shared Discord channel called #agents-only on ${s.name}'s behalf.
 Look out for ${s.name}, but be fair and friendly: the goal is a deal everyone actually says yes to.
@@ -17,7 +17,7 @@ You may say a time doesn't work; never say why.
 ${JSON.stringify(s.privateNotes)}
 
 Voice: short and casual, like a college student texting. One to three sentences. At most one emoji. Never make up items ${s.name} doesn't have.
-Refer to students by name or as they/them; never guess anyone's pronouns.`;
+Refer to students by name or as they/them ("${s.name}'s free...", "they can..."). Never write he, she, him, her, his, or hers about anyone.`;
 }
 
 /** Work out what the owner wants from a DM. */
@@ -27,24 +27,28 @@ export async function interpretDM(owner, text) {
 
 ${owner.name} just DMed you. Work out what they want.
 - "request": they need something (an item, a favor, help).
+- "meetup": they want to schedule something with other students (a study session, a group project meeting, planning a trip).
 - "update": they're telling you what they can offer, their skills, needs, or schedule.
 - "status": they're asking what you know about them or what's going on.
 - "chat": anything else.
 A request often also says what they can give in return; record that under addOffers/addSkills too.
-Schedule facts (classes, work, plans) go in privateNotes, never in offers.
+Schedule facts (classes, work, plans) go in addBusy (days Mon..Sun, 24-hour times; hard = class, shift, exam; soft = habits and plans that could move), never in offers.
 
 JSON shape:
 {
-  "intent": "request" | "update" | "status" | "chat",
+  "intent": "request" | "meetup" | "update" | "status" | "chat",
   "request": { "item": string, "details": string, "neededBy": string, "returnBy": string | null, "maxBudget": number | null, "offering": string[] } | null,
+  "meetup": { "topic": string, "with": string[], "course": string | null, "when": string, "durationMin": number, "preferredDays": string[], "earliest": "HH:MM" | null, "at": "HH:MM" | null, "place": string | null } | null,
   "addOffers": [{ "item": string, "terms": string }],
   "addSkills": string[],
   "addNeeds": string[],
   "privateNotes": string[],
+  "addBusy": [{ "days": string[], "start": "HH:MM", "end": "HH:MM", "label": string, "hard": boolean }],
   "availability": string | null,
   "reply": string
 }
-"reply" is what you text ${owner.name} right now (for a request: say you're asking around).`,
+"reply" is what you text ${owner.name} right now (for a request or meetup: say you're on it).
+For a meetup, preferredDays uses Mon..Sun, durationMin defaults to 90, earliest is set for words like "night" (18:00) or "afternoon" (12:00), and "at" is a specific start time if they gave one ("at 7pm" = "19:00").`,
     text,
     { temperature: 0.3 },
   );
@@ -57,6 +61,8 @@ export function applyProfileUpdates(owner, r) {
   for (const n of r.addNeeds || []) if (n && !owner.needs.includes(n)) owner.needs.push(n);
   for (const p of r.privateNotes || []) if (p && !owner.privateNotes.includes(p)) owner.privateNotes.push(p);
   if (r.availability) owner.availability = r.availability;
+  owner.schedule ||= { hours: ['09:00', '23:00'], busy: [] };
+  for (const b of r.addBusy || []) if (b?.days?.length && b.start && b.end) owner.schedule.busy.push(b);
   save();
 }
 
@@ -237,7 +243,7 @@ async function tryChain(owner, request, io) {
   });
 }
 
-async function propose(owner, request, io, plan) {
+export async function propose(owner, request, io, plan) {
   const deal = newDeal({ requesterId: owner.id, request, ...plan });
   await beat();
   await io.post(owner, `sending this to ${owner.name} for a yes. everyone's agents, confirm on your side 👇`);
@@ -247,7 +253,9 @@ async function propose(owner, request, io, plan) {
     if (s.id === owner.id) continue;
     if (s.simulated) {
       await beat();
-      const c = await agentConfirm(s, deal).catch(() => ({ accept: true, message: 'works for us 👍' }));
+      const c = deal.kind === 'meetup'
+        ? { accept: true, message: `that works for ${s.name}, it's on their calendar 👍` }
+        : await agentConfirm(s, deal).catch(() => ({ accept: true, message: 'works for us 👍' }));
       await io.post(s, c.message);
       deal.approvals[s.id] = c.accept ? 'yes' : 'no';
       if (!c.accept) {
@@ -299,6 +307,16 @@ async function fallback(deal, s, io) {
     if (s.id !== owner.id) await io.dmText(owner, `That deal fell through on the other side. I'm out of options for now, but I'll keep looking.`);
     else await io.dmText(owner, `No problem, nobody's told you passed. That was the last option I had; ask again anytime.`);
     return null;
+  }
+  if (next.lines) {
+    return propose(owner, deal.request, io, {
+      kind: deal.kind,
+      participants: deal.participants,
+      lines: next.lines,
+      summary: next.summary,
+      marketEstimate: null,
+      alternatives: deal.alternatives.slice(1),
+    });
   }
   const giver = state.students.find((x) => x.id === next.fromId);
   return propose(owner, deal.request, io, {

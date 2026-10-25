@@ -3,8 +3,9 @@ import {
   Client, GatewayIntentBits, Partials, Events, ChannelType,
   ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags,
 } from 'discord.js';
-import { state, save, studentForUser, reset } from './store.js';
+import { state, save, studentForUser, reset, logShared, demoProfile } from './store.js';
 import { interpretDM, applyProfileUpdates, runRequest, approve, decline } from './agents.js';
+import { runMeetup } from './meetup.js';
 import { MODEL } from './llm.js';
 
 for (const key of ['DISCORD_TOKEN', 'AGENTS_CHANNEL_ID', 'OPENROUTER_API_KEY']) {
@@ -45,6 +46,7 @@ const io = {
     if (!text) return;
     const h = await agentsHook();
     await h.send({ content: text.slice(0, 1900), username: `${s.name}'s agent`, avatarURL: avatar(s) });
+    logShared(s, text);
   },
   async dmText(s, text) {
     if (s.simulated || !s.discordId) return;
@@ -60,7 +62,11 @@ const io = {
 
     const embed = new EmbedBuilder()
       .setColor(CLAY)
-      .setTitle(deal.kind === 'chain' ? 'Found a trade loop' : `Found you a ${deal.request?.item ?? 'deal'}`)
+      .setTitle(
+        deal.kind === 'chain' ? 'Found a trade loop'
+          : deal.kind === 'meetup' ? `Found a time: ${deal.request?.topic ?? 'meetup'}`
+            : `Found you a ${deal.request?.item ?? 'deal'}`,
+      )
       .setDescription(deal.lines.map((l) => `• ${l}`).join('\n'))
       .setFooter({ text: 'Everyone has to say yes before anything happens.' });
     if (deal.summary) embed.addFields({ name: 'Why this one', value: deal.summary.slice(0, 1000) });
@@ -99,6 +105,14 @@ client.on(Events.MessageCreate, async (msg) => {
     const o = owner.offers.map((x) => `• ${x.item} (${x.terms})`).join('\n') || '• nothing yet';
     return msg.reply(`What other agents can see about you:\n**Offers**\n${o}\n**Skills:** ${owner.skills.join(', ') || 'none yet'}\n**Free:** ${owner.availability}\n\nPrivate notes I keep to myself: ${owner.privateNotes.length}`);
   }
+  if (/^!demo$/i.test(text)) {
+    demoProfile(owner);
+    return msg.reply('Loaded a demo profile: you can lend a USB-C charger and a monitor, you debug Python, you take CSE 310, and I know your class and work schedule (that stays with me). Try: "set up a CSE 310 study session this week" or "i need a tripod tonight".');
+  }
+  if (/^!share$/i.test(text)) {
+    const log = (owner.sharedLog || []).slice(-8).map((x) => `• ${x.text}`).join('\n') || '• nothing yet';
+    return msg.reply(`Everything I've said about you in #agents-only lately:\n${log}\n\nKept private: ${owner.privateNotes.length} notes (classes, shifts, limits). Other agents only ever see your offers, skills, courses, and free windows.`);
+  }
   if (busy.has(owner.id)) return msg.reply("Still working on your last ask, give me a sec.");
 
   busy.add(owner.id);
@@ -111,6 +125,8 @@ client.on(Events.MessageCreate, async (msg) => {
       owner.needs = [...new Set([...owner.needs, r.request.item])];
       save();
       await runRequest(owner, r.request, io);
+    } else if (r.intent === 'meetup' && r.meetup) {
+      await runMeetup(owner, r.meetup, io);
     }
   } catch (err) {
     console.error(err);

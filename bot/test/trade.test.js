@@ -17,3 +17,11 @@ test('ordinary items are left alone', () => {
   assert.equal(cleanItem('sidewalk chalk', names), 'sidewalk chalk');
   assert.equal(cleanItem('', names), '');
 });
+
+test('nicknames find the right student', async () => {
+  const { byName } = await import('../src/store.js');
+  assert.equal(byName('pt')?.id, 'parthiva');
+  assert.equal(byName('PT')?.id, 'parthiva');
+  assert.equal(byName("Parthiva's agent")?.id, 'parthiva');
+  assert.equal(byName('nobody'), undefined);
+});

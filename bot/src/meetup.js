@@ -94,6 +94,17 @@ export function typedClock(text) {
 export async function runMeetup(owner, meetup, io, text = '') {
   // The model sometimes writes times as 24-hour ("at 19:00"); the channel should read like a person ("at 7pm").
   meetup.when = String(meetup.when || '').replace(/\b([01]?\d|2[0-3]):([0-5]\d)\b/g, (_, h, m) => clock(Number(h) * 60 + Number(m)));
+  // Only real clock times count; the model sometimes writes words ("afternoon") into these fields.
+  const hhmm = (t) => (/^\d{1,2}:\d{2}$/.test(String(t || '')) ? t : null);
+  meetup.earliest = hhmm(meetup.earliest);
+  meetup.at = hhmm(meetup.at);
+  // "when is pt free" is a question, not a time. And name the actual day instead of "tomorrow".
+  const dayName = (offset) => new Date(Date.now() + offset * 86400000).toLocaleDateString('en-US', { weekday: 'long' });
+  meetup.when = meetup.when
+    .replace(/\btomorrow\b/i, dayName(1))
+    .replace(/\btoday\b/i, dayName(0))
+    .replace(/\btonight\b/i, `${dayName(0)} night`);
+  if (/\bfree\b|^when\b|^asap$|^soon$/i.test(meetup.when.trim())) meetup.when = 'this week';
   meetup.durationMin = Math.max(30, Number(meetup.durationMin) || 90);
   const named = (meetup.with || []).map(byName).filter((s) => s && s.id !== owner.id);
   // Named people win; a course only picks invitees when nobody was named.
@@ -164,7 +175,8 @@ export async function runMeetup(owner, meetup, io, text = '') {
     return null;
   }
 
-  const place = meetup.place || 'Hayden Hall study room';
+  // A study session gets the study room; a handoff or pickup happens in the lobby.
+  const place = meetup.place || (/study|session|project|homework|review|exam/i.test(meetup.topic || '') ? 'Hayden Hall study room' : 'Hayden Hall lobby');
   const toDeal = (slot, i = 0) => ({
     slot: { ...slot, place, label: say(slot) },
     lines: [`${meetup.topic}: ${say(slot)} at ${place}`, `With: ${names(people)}`],

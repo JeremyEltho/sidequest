@@ -85,9 +85,15 @@ export function studentForUser(user) {
   return s;
 }
 
+// Nicknames people actually use for each other ("pt" is Parthiva), on top of names and Discord usernames.
+const ALIASES = { parthiva: ['pt', 'parth'], levin: ['levvvv'], sid: ['s30.z', 'sidd'] };
+
 export function byName(name) {
-  const n = String(name || '').toLowerCase().replace(/'s agent$/, '').trim();
-  return state.students.find((s) => s.name.toLowerCase() === n);
+  const n = String(name || '').toLowerCase().replace(/['’]s agent$/, '').trim();
+  return state.students.find((s) =>
+    s.name.toLowerCase() === n
+    || s.discordUsername?.toLowerCase() === n
+    || (ALIASES[s.id] || []).includes(n));
 }
 
 /** Remember what a student's agent said in #agents-only, so the student can audit it with !share. */

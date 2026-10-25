@@ -24,13 +24,18 @@ Refer to students by name or as they/them ("${s.name}'s free...", "they can...")
 }
 
 /** Work out what the owner wants from a DM. */
-export async function interpretDM(owner, text) {
+export async function interpretDM(owner, text, now = new Date()) {
+  const day = (d) => d.toLocaleDateString('en-US', { weekday: 'long' });
+  const tomorrow = new Date(now.getTime() + 24 * 3600 * 1000);
+  const today = `${day(now)}, ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
   return askJSON(
     `${agentSystem(owner)}
 
+Today is ${today}. "tomorrow" is ${day(tomorrow)}; "tonight" is ${day(now)} evening.
+
 ${owner.name} just DMed you. Work out what they want.
 - "request": they need something (an item, a favor, help). "item" is just the thing ("speaker", "broom"), never a person's name or possessive: "parthiva's speaker" is item "speaker".
-- "meetup": they want to schedule something with other students (a study session, a group project meeting, planning a trip).
+- "meetup": they want to schedule something with other students: a study session, a group project meeting, planning a trip, or a meet-up to hand something off or pick it up. Asking "when is parthiva free to hand off the macbook" is a meetup: set topic to what it is for ("macbook handoff") and with to the person. Even a bare "when is pt free" is a meetup, with topic "meet up".
 - "update": they're telling you what they can offer, their skills, needs, or schedule.
 - "status": they're asking what you know about them or what's going on.
 - "chat": anything else.
@@ -59,7 +64,7 @@ JSON shape:
   "reply": string
 }
 "reply" is what you text ${owner.name} right now (for a request or meetup: say you're on it).
-For a meetup, preferredDays uses Mon..Sun, durationMin defaults to 90, earliest is set for words like "night" (18:00) or "afternoon" (12:00), and "at" is set only when they typed a clock time ("at 7pm" = "19:00"); words like "night" or "evening" never set "at".`,
+For a meetup, preferredDays uses Mon..Sun, durationMin defaults to 90 (30 for a quick handoff, pickup or chat), earliest is set for words like "night" (18:00) or "afternoon" (12:00), and "at" is set only when they typed a clock time ("at 7pm" = "19:00"); words like "night" or "evening" never set "at".`,
     text,
     { temperature: 0.3 },
   );
@@ -122,7 +127,9 @@ export async function approve(deal, s, io) {
     if (deal.slot) {
       await io.dmText(p, `It's on: **${deal.request?.topic ?? 'meetup'}**, ${deal.slot.label} at ${deal.slot.place}, with ${who}.\nI'll remind you 30 minutes before. Reply here if something comes up.`);
     } else {
-      await io.dmText(p, `It's on.\n${deal.lines.map((l) => `• ${l}`).join('\n')}\nReply here if plans change and I'll let the other agents know.`);
+      const others = deal.participants.map((pid) => state.students.find((x) => x.id === pid)).filter((x) => x && x.id !== p.id).map((x) => x.name);
+      const next = deal.kind === 'direct' && others.length === 1 ? `\nNext: ask me "when is ${others[0]} free to hand it off" and I'll find a time that works for both of you.` : '';
+      await io.dmText(p, `It's on.\n${deal.lines.map((l) => `• ${l}`).join('\n')}${next}\nReply here if plans change and I'll let the other agents know.`);
     }
   }
 }

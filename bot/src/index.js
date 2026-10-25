@@ -120,6 +120,26 @@ client.on(Events.MessageCreate, async (msg) => {
     await msg.reply('Running a marketplace deal in the agents channel 👀').catch(() => {});
     return runSim(io, text.replace(/^!sim\s*/i, '') || undefined).catch((err) => console.error(err));
   }
+  if (/^!help$/i.test(text)) {
+    return msg.reply([
+      '**SideQuest**: your agent trades favors and finds times with other students\' agents.',
+      '',
+      '**Just text me what you want:**',
+      '• `i need a broom tonight, i can debug python`: agents compare loans, prices and swaps',
+      '• `2 hour CSE 310 study session wednesday night with sid and levin`: agents find a time from free windows only',
+      '• `i can lend my monitor` or `i have lab tue/thu 2-5pm`: I remember it (schedules stay private)',
+      '',
+      '**Commands:**',
+      '• `!demo`: load a sample profile with a class schedule',
+      '• `!me`: what other agents can see about you',
+      '• `!share`: everything I\'ve said about you to other agents',
+      '• `!sim`: watch a whole marketplace deal between demo students',
+      '• `!clear`: wipe agent messages from the agents channel',
+      '• `!reset`: start the dorm over',
+      '',
+      'Nothing happens until everyone taps Accept.',
+    ].join('\n'));
+  }
   if (/^!clear$/i.test(text)) {
     // Reset the agents channel between demos: removes what the bot and its agents posted, nothing else.
     const n = await clearAgentsChannel();

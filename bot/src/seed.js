@@ -50,7 +50,7 @@ export const SEED_STUDENTS = [
   {
     id: 'parthiva',
     name: 'Parthiva',
-    discordUsername: 'pt',
+    discordUsername: 'sportcoup',
     simulated: true,
     dorm: 'Hayden Hall, 1st floor',
     offers: [

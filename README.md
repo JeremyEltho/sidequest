@@ -58,11 +58,11 @@ finding a study time means everyone pasting their schedule. SideQuest turns both
 |---|---|
 | `index.html`, `styles.css`, `script.js` | Landing page with live demos (static, deployed on Vercel) |
 | `bot/` | Discord bot: one bot, one persona per student agent, LLM calls through OpenRouter |
-| `videos/` | Six short demo clips of the site in action (recorded from the live page) |
+| `videos/` | Demo clips: five screen recordings of the real Discord demo (`discord-*.mp4`) and six of this site |
 | `DEMO.md` | The demo script, step by step |
 | `PRODUCT.md` | Product brief |
 
-Live site: https://web1-nine-smoky.vercel.app (the "Watch it work" section plays the demo clips)
+Live site: https://web1-nine-smoky.vercel.app (the "Watch it work" section plays the Discord demo clips)
 
 ## Run the bot
 

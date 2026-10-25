@@ -22,7 +22,7 @@ export const SCENARIOS = {
  * runSim(io)                       the default fridge deal
  * runSim(io, "some request")       a request read from plain words (npm run sim "...")
  * runSim(io, { item, price, budget, lowest, seller })
- *   a sale you set up yourself: `seller` lists `item` at `price` (with an optional private `lowest`),
+ *   a sale you set up yourself (or { offer, budget, seller } to use the seller's saved listing): `seller` lists `item` at `price` (with an optional private `lowest`),
  *   Sid's agent shops for it with `budget`, and nobody else's listings compete.
  */
 export async function runSim(io, input = DEFAULT_ASK) {
@@ -31,9 +31,10 @@ export async function runSim(io, input = DEFAULT_ASK) {
 
   if (input && typeof input === 'object') {
     const seller = input.seller && input.seller.id !== buyer.id ? input.seller : state.students.find((s) => s.id !== buyer.id);
-    const offer = normalizeOffer({ item: input.item, kind: 'sell', price: input.price, floor: input.lowest ?? null, terms: '' });
-    if (!offer) throw new Error('A sale needs an item and an asking price.');
-    const request = { item: input.item, details: '', neededBy: '', returnBy: null, maxBudget: input.budget ?? null, offering: [] };
+    // Either the seller's real saved listing (with its private lowest price) or one typed in on the spot.
+    const offer = input.offer ? normalizeOffer(input.offer) : normalizeOffer({ item: input.item, kind: 'sell', price: input.price, floor: input.lowest ?? null, terms: '' });
+    if (!offer || offer.price == null) throw new Error('A sale needs an item and an asking price.');
+    const request = { item: input.item ?? offer.item, details: '', neededBy: '', returnBy: null, maxBudget: input.budget ?? null, offering: [] };
     return runRequest(buyer, request, io, { simulation: true, onlyListings: [{ holder: seller, offer }] });
   }
 

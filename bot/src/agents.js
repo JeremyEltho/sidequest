@@ -36,7 +36,8 @@ ${owner.name} just DMed you. Work out what they want.
 - "chat": anything else.
 A request often also says what they can give in return; record that under addOffers/addSkills too.
 Listings go in addOffers: kind is sell, lend, rent, give or service; price is what they're asking; floor is a lowest
-price only if they said one ("won't go under $35"). To take a listing down, put its name in removeOffers.
+price only if they said one ("won't go under $35").
+Copy the item's name the way they said it ("macbook", "desk lamp"); never add category words like "computer" or "item". To take a listing down, put its name in removeOffers.
 Usual free times ("I'm usually free weekdays after 6") go in setFree and replace the old ones.
 Commitments (classes, work, plans) go in addBusy: days Mon..Sun, 24-hour times, hard = class, shift or exam,
 soft = habits and plans that could move. Never put a commitment in offers. Course codes go in addCourses.

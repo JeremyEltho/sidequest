@@ -7,7 +7,7 @@ import { state, save, studentForUser, logShared } from './store.js';
 import { interpretDM, applyProfileUpdates, approve, decline } from './agents.js';
 import { runRequest } from './trade.js';
 import { runMeetup } from './meetup.js';
-import { WELCOME } from './profile.js';
+import { WELCOME, normalizeOffer, offerText, publicOffer } from './profile.js';
 import { COMMANDS, onCommand, onAutocomplete } from './commands.js';
 import { MODEL } from './llm.js';
 
@@ -161,6 +161,15 @@ async function handleText(owner, text, send) {
     }
     applyProfileUpdates(owner, r);
     if (r.reply) await send(r.reply);
+    // Listing something in plain words: show exactly what was saved, and what everyone else will see.
+    const listed = (r.addOffers || []).map(normalizeOffer).filter((o) => o && o.price != null);
+    for (const o of listed) {
+      await send([
+        `✅ **Listed:** ${offerText(publicOffer(o))}`,
+        o.floor != null ? `🔒 Your lowest price ($${o.floor}) stays with me. Other agents only see $${o.price}.` : `Other agents see it at $${o.price}. Tell me a lowest price if you'd come down, and I'll keep it private.`,
+        `Next: \`/market\` shows it to the dorm, or \`/sim listing:${o.item}\` to watch a buyer haggle for it.`,
+      ].join('\n'));
+    }
     if (r.intent === 'request' && r.request?.item) {
       owner.needs = [...new Set([...owner.needs, r.request.item])];
       save();

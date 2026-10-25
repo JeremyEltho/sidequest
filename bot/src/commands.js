@@ -37,6 +37,7 @@ export const COMMANDS = [
   { name: 'demo', description: 'Load a sample profile with listings and a class schedule' },
   { name: 'sim', description: 'Watch a deal play out. Pick a ready-made one, or build your own sale.', options: [
     { type: STRING, name: 'scenario', description: 'Pick a ready-made deal', choices: Object.entries(SCENARIOS).map(([value, sc]) => ({ name: sc.label.slice(0, 100), value })) },
+    { type: STRING, name: 'listing', description: 'One of your own listings: a buyer shows up and haggles for it', autocomplete: true },
     { type: STRING, name: 'item', description: 'What you are selling, e.g. macbook (leave empty for the default fridge deal)' },
     { type: NUMBER, name: 'price', description: 'Your asking price in dollars', min_value: 0 },
     { type: NUMBER, name: 'budget', description: "What the buyer (Sid's agent) can pay", min_value: 0 },
@@ -132,6 +133,15 @@ export async function onCommand(i, ctx) {
         await i.reply(`Simulating: ${scenario.label} 👀`);
         return runSim(ctx.io, { ...scenario, seller: owner }).catch((err) => console.error(err));
       }
+      const listing = opt('listing');
+      if (listing) {
+        // The flow: you listed something in plain words, now a buyer shows up for that exact listing.
+        const offer = (owner.offers || []).find((o) => o.price != null && o.item.toLowerCase() === listing.toLowerCase());
+        if (!offer) return i.reply(priv(`You don't have a priced listing called "${listing}". List one first: just tell me "selling my macbook for $900, won't go below $700".`));
+        const budget = opt('budget') ?? Math.round(offer.price * 0.8);
+        await i.reply(`A buyer shows up for ${owner.name}'s ${offer.item} (asking $${offer.price}, buyer has $${budget}) 👀`);
+        return runSim(ctx.io, { offer, budget, seller: owner }).catch((err) => console.error(err));
+      }
       const item = opt('item');
       if (item && (opt('price') == null || opt('budget') == null)) {
         return i.reply(priv('To simulate a sale I need the item, your asking price and the buyer\'s budget, like `/sim item:macbook price:900 budget:750`. Add `lowest` for your private floor.'));
@@ -161,8 +171,9 @@ export async function onCommand(i, ctx) {
 export async function onAutocomplete(i) {
   const owner = studentForUser(i.user);
   const typed = String(i.options.getFocused() || '').toLowerCase();
+  // /sim only offers listings that have a price; /remove offers all of them.
   const choices = (owner.offers || [])
-    .filter((o) => o.item.toLowerCase().includes(typed))
+    .filter((o) => (i.commandName !== 'sim' || o.price != null) && o.item.toLowerCase().includes(typed))
     .slice(0, 25)
     .map((o) => ({ name: o.item.slice(0, 100), value: o.item.slice(0, 100) }));
   return i.respond(choices);

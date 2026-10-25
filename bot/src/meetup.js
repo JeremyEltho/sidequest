@@ -86,7 +86,12 @@ function voice(s, meetup, windows, flexed) {
   return `${s.name}'s free ${preferred.join(', ')}${other.length ? `. also open ${other.join(', ')}` : ''}`;
 }
 
-export async function runMeetup(owner, meetup, io) {
+/** True when a message names a clock time ("7pm", "at 7", "19:30"), so the time is exact, not "sometime after". */
+export function typedClock(text) {
+  return /\b\d{1,2}(:\d{2})?\s*(am|pm)\b|\b\d{1,2}:\d{2}\b|\bat\s+\d{1,2}\b/i.test(String(text || ''));
+}
+
+export async function runMeetup(owner, meetup, io, text = '') {
   meetup.durationMin = Math.max(30, Number(meetup.durationMin) || 90);
   const named = (meetup.with || []).map(byName).filter((s) => s && s.id !== owner.id);
   // Named people win; a course only picks invitees when nobody was named.
@@ -102,7 +107,7 @@ export async function runMeetup(owner, meetup, io) {
   const people = [owner, ...invitees];
   meetup.preferredDays = (meetup.preferredDays || []).map(dayOf).filter(Boolean);
   // Only a clock time the student actually typed ("at 7pm") is an exact start; "night" just means after earliest.
-  if (meetup.at && !/\d/.test(meetup.when || '')) {
+  if (meetup.at && !typedClock(`${text} ${meetup.when || ''}`)) {
     meetup.earliest ||= meetup.at;
     meetup.at = null;
   }

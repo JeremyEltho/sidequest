@@ -161,7 +161,7 @@ async function handleText(owner, text, send) {
       save();
       await runRequest(owner, r.request, io);
     } else if (r.intent === 'meetup' && r.meetup) {
-      await runMeetup(owner, r.meetup, io);
+      await runMeetup(owner, r.meetup, io, text);
     }
   } catch (err) {
     console.error(err);

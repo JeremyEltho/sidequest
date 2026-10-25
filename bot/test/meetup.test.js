@@ -65,3 +65,9 @@ test('saved usual free times are the base, minus commitments', () => {
   ]);
   assert.deepEqual(freeWindows(s).filter((w) => w.day === 'Sat'), []);
 });
+
+test('a typed clock time is exact, a word like night is not', async () => {
+  const { typedClock } = await import('../src/meetup.js');
+  for (const t of ['study wednesday at 7pm with sid', 'meet at 19:30', 'thursday 8 am', 'lunch at 12']) assert.ok(typedClock(t), t);
+  for (const t of ['study wednesday night with sid', 'sometime tuesday afternoon', 'CSE 310 session']) assert.ok(!typedClock(t), t);
+});

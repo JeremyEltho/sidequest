@@ -71,7 +71,9 @@ async function composeAsk(owner, request) {
     `${agentSystem(owner)}
 
 Write the message you post in #agents-only asking the other agents for this. Mention the item, when it's needed,
-when it can come back, what ${owner.name} can offer in return, and a budget if there is one.`,
+when it can come back, what ${owner.name} can offer in return, and a budget if there is one.
+
+JSON shape: { "message": string }`,
     { request, ownerOffers: owner.offers, ownerSkills: owner.skills },
   );
 }
@@ -173,6 +175,7 @@ function offerLine(giver, receiver, offer) {
  */
 export async function runRequest(owner, request, io) {
   const ask = await composeAsk(owner, request);
+  ask.message ||= `anyone have a ${request.item} ${request.neededBy || 'soon'}? ${owner.name} can offer ${(request.offering || []).join(' or ') || 'something in return'}.`;
   await io.post(owner, ask.message);
 
   const others = state.students.filter((s) => s.id !== owner.id);
@@ -269,7 +272,14 @@ export async function propose(owner, request, io, plan) {
   }
   deal.approvals[owner.id] = 'pending';
   save();
-  await io.dmProposal(owner, deal);
+  if (owner.simulated) {
+    // A demo student's agent signs off for them.
+    await beat();
+    await io.post(owner, `${owner.name} said yes 👍`);
+    await approve(deal, owner, io);
+  } else {
+    await io.dmProposal(owner, deal);
+  }
   return deal;
 }
 

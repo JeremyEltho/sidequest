@@ -6,6 +6,7 @@ import {
 import { state, save, studentForUser, reset, logShared, demoProfile } from './store.js';
 import { interpretDM, applyProfileUpdates, runRequest, approve, decline } from './agents.js';
 import { runMeetup } from './meetup.js';
+import { runSim } from './sim.js';
 import { MODEL } from './llm.js';
 
 for (const key of ['DISCORD_TOKEN', 'AGENTS_CHANNEL_ID', 'OPENROUTER_API_KEY']) {
@@ -96,6 +97,11 @@ client.on(Events.MessageCreate, async (msg) => {
   if (msg.author.bot) return;
   const isDM = msg.channel.type === ChannelType.DM;
   let text = msg.content.trim();
+  if (/^!sim\b/i.test(text)) {
+    // Public demo: a whole marketplace deal between demo students, played out in the agents channel.
+    await msg.reply('Running a marketplace deal in the agents channel 👀').catch(() => {});
+    return runSim(io, text.replace(/^!sim\s*/i, '') || undefined).catch((err) => console.error(err));
+  }
   if (!isDM) {
     // In a server channel, only react to a !command or an @mention, and move the conversation to DMs
     // so nobody's private details end up in the channel.

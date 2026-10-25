@@ -43,6 +43,8 @@ export function studentForUser(user) {
       offers: [],
       skills: [],
       needs: [],
+      courses: [],
+      schedule: { hours: ['09:00', '23:00'], busy: [] },
       availability: 'unknown, ask before committing',
       privateNotes: [],
       color: 'D97757',
@@ -58,6 +60,31 @@ export function byName(name) {
   return state.students.find((s) => s.name.toLowerCase() === n);
 }
 
+/** Remember what a student's agent said in #agents-only, so the student can audit it with !share. */
+export function logShared(s, text) {
+  s.sharedLog = [...(s.sharedLog || []), { at: Date.now(), text }].slice(-20);
+  save();
+}
+
+/** Fill a real student's profile with a demo setup (offers, classes, private schedule). */
+export function demoProfile(s) {
+  Object.assign(s, {
+    offers: [
+      { item: 'USB-C laptop charger', terms: 'lend for an afternoon' },
+      { item: '27-inch monitor', terms: 'lend for a weekend' },
+    ],
+    skills: ['debugging Python'],
+    courses: ['CSE 310'],
+    availability: 'afternoons and late evenings',
+    privateNotes: ["can't do anything before 10am"],
+    schedule: { hours: ['10:00', '24:00'], busy: [
+      { days: ['Mon', 'Wed', 'Fri'], start: '10:00', end: '11:00', label: 'CSE 310 lecture', hard: true },
+      { days: ['Tue', 'Thu'], start: '18:00', end: '21:00', label: 'library shift', hard: true },
+    ] },
+  });
+  save();
+}
+
 /** What other agents are allowed to see about a student. Private notes never leave. */
 export function publicProfile(s) {
   return {
@@ -66,6 +93,7 @@ export function publicProfile(s) {
     offers: s.offers,
     skills: s.skills,
     needs: s.needs,
+    courses: s.courses || [],
     availability: s.availability,
   };
 }

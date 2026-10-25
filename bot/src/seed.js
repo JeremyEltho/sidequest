@@ -13,7 +13,12 @@ export const SEED_STUDENTS = [
     skills: ['proofreading essays'],
     needs: ['someone to look at a Python bug (pandas merge giving duplicate rows)'],
     availability: 'free after 6pm most days',
-    privateNotes: ['Orgo lab Tue/Thu 2-5pm', 'would rather trade a favor than take money'],
+    courses: ['CSE 310', 'CHM 233'],
+    schedule: { hours: ['09:00', '23:00'], busy: [
+      { days: ['Tue', 'Thu'], start: '14:00', end: '17:00', label: 'Orgo lab', hard: true },
+      { days: ['Mon'], start: '18:00', end: '20:00', label: 'team dinner', hard: false },
+    ] },
+    privateNotes: ['Orgo lab Tue/Thu 2-5pm', 'team dinner Mon 6-8pm', 'likes studying in the evening, never after 11pm', 'would rather trade a favor than take money'],
     color: '788C5D',
   },
   {
@@ -28,6 +33,10 @@ export const SEED_STUDENTS = [
     skills: ['bike repair'],
     needs: ['tripod for a film class shoot'],
     availability: 'around 12-2pm and after 9pm',
+    courses: ['FMS 200'],
+    schedule: { hours: ['10:00', '24:00'], busy: [
+      { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], start: '16:00', end: '21:00', label: 'dining hall shift', hard: true },
+    ] },
     privateNotes: ['works at the dining hall 4-9pm', 'will go down to $6 on the broom if pushed', 'really wants a tripod this week'],
     color: '6A9BCC',
   },
@@ -43,7 +52,12 @@ export const SEED_STUDENTS = [
     skills: ['photo editing'],
     needs: ['prints picked up from the library print shop'],
     availability: 'free 5-6pm and after 10pm',
-    privateNotes: ['8am class every weekday', 'studio hours 9am-4pm'],
+    courses: ['CSE 310', 'ART 112'],
+    schedule: { hours: ['08:00', '24:00'], busy: [
+      { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], start: '08:00', end: '16:00', label: '8am class, then studio hours', hard: true },
+      { days: ['Wed'], start: '19:00', end: '21:00', label: 'rehearsal', hard: true },
+    ] },
+    privateNotes: ['8am class every weekday', 'studio hours 9am-4pm weekdays', 'rehearsal Wed 7-9pm', 'asleep by midnight'],
     color: 'C46686',
   },
   {
@@ -55,7 +69,14 @@ export const SEED_STUDENTS = [
     skills: ['calc tutoring'],
     needs: ['USB-C laptop charger for an afternoon'],
     availability: 'free 3-3:30pm and after 5pm',
-    privateNotes: ['CS 340 at 3:30', 'gym at noon'],
+    courses: ['CSE 310', 'MAT 343'],
+    schedule: { hours: ['08:00', '23:30'], busy: [
+      { days: ['Mon', 'Wed'], start: '15:30', end: '16:45', label: 'CS 340', hard: true },
+      { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], start: '12:00', end: '13:00', label: 'gym', hard: false },
+      { days: ['Fri'], start: '13:00', end: '17:00', label: 'work-study', hard: true },
+      { days: ['Thu'], start: '18:00', end: '20:00', label: 'intramural soccer', hard: false },
+    ] },
+    privateNotes: ['CS 340 Mon/Wed 3:30-4:45pm', 'gym at noon', 'work-study Fri 1-5pm', 'Thursday evenings are for intramural soccer 6-8pm'],
     color: 'D4A27F',
   },
   {
@@ -70,6 +91,11 @@ export const SEED_STUDENTS = [
     skills: ['resume reviews'],
     needs: ['someone to return two library books'],
     availability: 'evenings',
+    courses: ['ENG 101'],
+    schedule: { hours: ['10:00', '23:00'], busy: [
+      { days: ['Thu'], start: '09:00', end: '12:00', label: 'midterm', hard: true },
+      { days: ['Wed'], start: '18:00', end: '23:00', label: 'studying for the midterm', hard: false },
+    ] },
     privateNotes: ['has a midterm Thursday', 'is fine giving the Swiffer for free to someone on her floor'],
     color: 'CC785C',
   },

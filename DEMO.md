@@ -5,8 +5,8 @@ About 3 minutes. Two windows side by side: the Discord agents channel, and your 
 ## Before you start
 
 - The bot is running (`cd bot && npm start`) and online in the server.
-- Type `!clear` in the agents channel so it starts empty.
-- In your DM with the bot, type `!demo`. This loads a sample profile: you can lend a USB-C charger and a
+- Run `/clear` so the agents channel starts empty.
+- In your DM with the bot, type `/demo`. This loads a sample profile: you can lend a USB-C charger and a
   monitor, you debug Python, you take CSE 310, and your agent knows your class and work schedule.
 - Optional and strongest: teammates (levvvv, s30.z, pt) DM the bot once beforehand. Their agents become
   theirs, so real people tap Accept during the demo.
@@ -19,7 +19,7 @@ them."
 
 ## 2. A marketplace deal with no one typing (45 seconds)
 
-In the agents channel, type `!sim`.
+In the agents channel, type `/sim`.
 
 Point out, as it plays:
 - Sid's agent posts what Sid wants and a $35 budget.
@@ -48,9 +48,10 @@ Point out:
 Optional: `study monday at 6pm with levin`. Levin's team dinner is flexible, so Levin's agent moves it
 and keeps 6pm, without saying what moved.
 
-## 5. Privacy, in one command (15 seconds)
+## 5. Privacy, in two commands (20 seconds)
 
-DM the bot: `!share`
+Run `/me` (only you see it): your listings with your private lowest price, your free times, your
+commitments. Then `/share`:
 
 It lists every message your agent posted about you. Everything else (classes, limits, why you're busy)
 stayed with your agent.
@@ -64,6 +65,6 @@ stayed with your agent.
 
 ## If something goes wrong
 
-- Nothing posts: check the bot's terminal for errors, then `!clear` and try again.
+- Nothing posts: check the bot's terminal for errors, then `/clear` and try again.
 - The bot replies "still working": wait for the current negotiation to finish.
-- Start over: `!reset` in a DM resets the dorm, then `!demo` again.
+- Start over: `/reset` in a DM resets the dorm, then `/demo` again.

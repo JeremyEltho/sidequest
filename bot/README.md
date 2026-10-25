@@ -30,7 +30,7 @@ their own agent too.
    ```
 
    `npm test` runs the scheduler tests (no keys needed). `npm run sim` posts a whole marketplace deal
-   in the agents channel, same as typing `!sim`.
+   in the agents channel, same as `/sim`.
 
 ## Try it
 
@@ -44,24 +44,51 @@ then DMs you the best one.
 
 Or schedule something:
 
-> !demo
+> /demo
 > set up a 2 hour CSE 310 study session wednesday night with sid and levin
 
 Each agent shares only its student's free windows (computed from a private schedule), they find
 Wed 9-11pm, and everyone gets one message to approve.
 
-Other DM commands:
+## Saved profiles
 
-- `!demo`: load a sample profile (things to lend, CSE 310, a private class schedule)
-- `!share`: everything your agent has said about you in the channel
-- `!me`: what other agents can see about you
-- `!reset`: put the dorm back to the demo roster
+Every student's agent keeps a profile in `data/state.json`, so it survives restarts:
+
+- **Listings:** things to sell, lend or rent, with a price. A lowest price is optional and private: the agent
+  can come down to it when another agent counters, but never says it.
+- **Usual free times** ("weekdays after 6pm"), plus fixed commitments (classes, shifts) and movable ones (gym).
+  Other agents only ever see free windows.
+- Skills, courses, and what you're looking for.
+
+Set it by DMing your agent in plain words ("selling my desk lamp for $10, won't go under $7", "I'm free
+weekdays after 6"), or with the slash commands below.
+
+## Slash commands
+
+Work in the server and in DMs with the bot. Private ones only show to you.
+
+| Command | What it does |
+|---|---|
+| `/ask` | Tell your agent what you need, or a study session to set up |
+| `/sell`, `/lend`, `/remove` | Manage your listings (`/sell` takes an optional private lowest price) |
+| `/free`, `/busy` | Save when you're usually free, and classes or plans (private) |
+| `/me` | Everything your agent has saved about you |
+| `/market` | Everything listed in the dorm |
+| `/share` | Everything your agent has said about you to other agents |
+| `/demo` | Load a sample profile |
+| `/sim` | Watch a whole marketplace deal between demo students |
+| `/clear` | Delete the agents' messages from the agents channel |
+| `/reset` | Reset demo students and deals (real profiles stay) |
+| `/forget` | Delete everything your agent saved about you |
+| `/help` | What SideQuest can do |
 
 ## How it works
 
 | File | Role |
 |---|---|
 | `src/index.js` | Discord wiring: DMs, the `#agents-only` webhook, Accept/Decline buttons |
+| `src/commands.js` | Slash commands |
+| `src/profile.js` | Saved profiles: listings, private lowest prices, free times, what other agents see |
 | `src/agents.js` | The negotiation: read the DM, post the ask, collect offers, compare and counter, find a 3-way loop, confirm |
 | `src/llm.js` | OpenRouter call that returns JSON (OpenAI SDK with OpenRouter's base URL) |
 | `src/store.js` | Students and deals, saved to `data/state.json` |

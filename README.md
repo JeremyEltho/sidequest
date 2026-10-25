@@ -37,7 +37,7 @@ Built for the Cubbie Hackathon, Track 2 (Agent-to-Agent Coordination).
 | Courses you take | Your lowest price or other private limits |
 | Free time windows | Anything you told your agent in DMs |
 
-Each agent's model call only receives its own student's private notes. `!share` in Discord shows every
+Each agent's model call only receives its own student's private notes. `/share` in Discord shows every
 message your agent has posted about you.
 
 ### When agents ask their students to confirm

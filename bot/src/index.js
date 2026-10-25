@@ -93,9 +93,21 @@ client.once(Events.ClientReady, async (c) => {
 });
 
 client.on(Events.MessageCreate, async (msg) => {
-  if (msg.author.bot || msg.channel.type !== ChannelType.DM) return;
+  if (msg.author.bot) return;
+  const isDM = msg.channel.type === ChannelType.DM;
+  let text = msg.content.trim();
+  if (!isDM) {
+    // In a server channel, only react to a !command or an @mention, and move the conversation to DMs
+    // so nobody's private details end up in the channel.
+    const mentioned = msg.mentions.users.has(client.user.id);
+    if (!mentioned && !text.startsWith('!')) return;
+    text = text.replace(/<@!?\d+>/g, '').trim();
+    if (!text) return;
+    await msg.reply("I'll take this to your DMs so your details stay private. 👋").catch(() => {});
+  }
   const owner = studentForUser(msg.author);
-  const text = msg.content.trim();
+  const dm = isDM ? msg.channel : await msg.author.createDM();
+  msg = { reply: (t) => dm.send(t), channel: dm };
 
   if (/^!reset$/i.test(text)) {
     reset();

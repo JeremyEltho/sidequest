@@ -5,6 +5,12 @@ import { REST, Routes, WebhookClient } from 'discord.js';
 import { runSim } from './sim.js';
 import { logShared } from './store.js';
 
+const missing = ['DISCORD_TOKEN', 'AGENTS_CHANNEL_ID', 'OPENROUTER_API_KEY'].filter((k) => !process.env[k]);
+if (missing.length) {
+  console.error(`Missing in bot/.env: ${missing.join(', ')}. Run \`npm run check\` for how to fix each one.`);
+  process.exit(1);
+}
+
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 const channelId = process.env.AGENTS_CHANNEL_ID;
 const me = await rest.get(Routes.user());

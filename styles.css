@@ -508,3 +508,46 @@ mark.t { background: none; color: inherit; font: 600 .95em var(--mono); padding:
   .wk-hours, .who-key { margin-left: 0; }
   .wk-day { grid-template-columns: 1fr; gap: 4px; }
 }
+
+/* ---------- what each agent knew ---------- */
+.knew { display: grid; gap: 12px; }
+.knew-card { background: #fff; border-radius: 18px; padding: 16px 18px; outline: 1px solid var(--rule); display: grid; gap: 8px; }
+.knew-card b { font-size: 1rem; }
+.knew-card p { font-size: .95rem; padding: 8px 12px; border-radius: 10px; }
+.knew-shared { background: rgba(120, 140, 93, .14); }
+.knew-private { background: var(--oat); position: relative; }
+.knew-private em { font-style: normal; filter: blur(3.5px); color: var(--ink-2); user-select: none; }
+.knew-private::after { content: "stays with this agent"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font: 400 1.05rem/1 var(--hand); color: var(--ink-2); }
+
+/* ---------- profile ---------- */
+.prof-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
+.prof-card { background: #fff; border-radius: 26px; padding: clamp(18px, 2.6vw, 28px); outline: 1px solid var(--rule); box-shadow: 0 1px 0 var(--rule), 0 30px 60px -40px rgba(20,20,19,.4); }
+.prof-top { margin-bottom: 18px; }
+.seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--paper-2); }
+.seg button { border: 0; cursor: pointer; font: 600 .9rem var(--display); color: var(--ink-2); background: transparent; padding: 9px 14px; border-radius: 999px; transition: background-color .3s, color .3s, box-shadow .3s; }
+.seg button[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(20,20,19,.15); }
+.prof-card h3 { font-size: .8rem; font-family: var(--mono); font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; margin: 18px 0 8px; }
+.prof-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.prof-list li { display: flex; justify-content: space-between; gap: 16px; padding: 10px 14px; border-radius: 12px; background: var(--paper); font-size: .95rem; }
+.prof-list li span:last-child { color: var(--ink-2); text-align: right; }
+.prof-free { padding: 10px 14px; border-radius: 12px; background: rgba(120, 140, 93, .14); font-size: .95rem; }
+.secret { font-style: normal; color: var(--red-ink); transition: filter .5s var(--ease), opacity .5s; }
+.secret-block { position: relative; transition: filter .5s var(--ease); }
+.prof-card[data-view="them"] .secret { filter: blur(5px); opacity: .5; }
+.prof-card[data-view="them"] .secret-block { filter: blur(5px); user-select: none; }
+.prof-card[data-view="them"] .secret-block::after { content: ""; }
+.prof-card h3:has(+ .secret-block)::after { content: " · private"; text-transform: none; color: var(--red-ink); }
+.prof-note { margin-top: 18px; font-size: .9rem; color: var(--ink-2); }
+.prof-note code, .prof-side code { font: 600 .85em var(--mono); background: var(--paper-2); padding: 1px 6px; border-radius: 6px; color: var(--ink); }
+.said { list-style: none; padding: 0; margin: 0 0 18px; display: grid; gap: 8px; }
+.said li { justify-self: start; background: var(--ink); color: var(--paper); border-radius: 18px 18px 18px 6px; padding: 10px 16px; font-size: .95rem; }
+
+@media (max-width: 900px) {
+  .prof-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .prof-list li { flex-direction: column; gap: 2px; }
+  .prof-list li span:last-child { text-align: left; }
+  .seg button { padding: 8px 10px; font-size: .82rem; }
+  .knew-private::after { display: none; }
+}

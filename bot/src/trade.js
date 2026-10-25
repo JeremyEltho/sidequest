@@ -146,7 +146,10 @@ export async function runRequest(owner, request, io, opts = {}) {
     await beat();
     if (budget >= floor) {
       price = budget;
-      await io.post(best.holder, `${money(budget)} works. deal.`);
+      // A real seller hasn't agreed to anything yet: their agent can only say it's within what they'd take.
+      // They still get a DM to accept. A demo seller's agent can say it's a deal.
+      const needsOk = !opts.simulation && !best.holder.simulated;
+      await io.post(best.holder, needsOk ? `${money(budget)} could work for ${best.holder.name}. checking with them before anything is final.` : `${money(budget)} works. deal.`);
     } else {
       price = Math.max(floor, Math.ceil((best.price + budget) / 2));
       await io.post(best.holder, price < best.price ? `best I can do is ${money(price)}.` : `sorry, ${money(price)} is firm.`);
